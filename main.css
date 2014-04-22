@@ -1,0 +1,21 @@
+.xpathor-tips {
+	width: 100%;
+	text-align: center;
+	background-color: #93DD6E;
+	color:#ffffff;
+	font-family:arial;
+	font-size:30px;
+	font-weight:bold;
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	z-index: 99999999;
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+.xpathor-selection {
+	outline: 2px dashed blue;
+	outline-offset: 1px;
+	z-index: 99999999;
+}

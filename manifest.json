@@ -1,0 +1,30 @@
+{
+    "name": "Xpathor",
+    "version": "1.0",
+    "manifest_version": 2,
+    "description": "Xpathor",
+    "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC3ZeBGSYWB7+IVcw9N1ffK6NZH1oM8+DjPJSDmJVgMPjtQMbonLS/EJ50rqJpYgBgEGfg10LDN1f32J77fk6mvF5q4LvKnjhJvLPwPym8Qhf7QXyGRfoP5AU7Y1+hozJ3SbFI5rmsiUpHXSQ8+vkh/qSnrpYzcs2uqvo01kmnWZQIDAQAB",
+    "browser_action": {
+		"default_popup": "popup.html",
+		"default_title": "Xpathor",
+        "default_icon": "smile.gif"
+    },
+	"options_page": "options.html",
+    "content_scripts": [{
+        "matches": [
+            "http://*/*",
+            "https://*/*"
+        ],
+        "js": ["jquery.js", "jquery.xpath.min.js", "xpath.js", "definations.js", "extractor.js", "portal.js", "roll.js", "main.js"],
+        "css": ["main.css"],
+        "run_at": "document_end",
+        "all_frames": false
+    }],
+    "externally_connectable": {
+        "matches": []
+    },
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    }
+}
