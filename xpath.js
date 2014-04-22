@@ -45,10 +45,10 @@ var XpathGenerator = {
         clas = clas.replace(/\d+/g, "");
         var clases = clas.split(" ");
         if (clases.length == 1){
-            clas;
+            return clas;
         }
         for (var i=0; i < clases.length; i++){
-            for (var j=0; i < this._good_class_words.length; j++){
+            for (var j=0; j < this._good_class_words.length; j++){
                 if (clases[i].indexOf(this._good_class_words[j].toLowerCase()) != -1){
                     return clases[i];
                 }
@@ -61,7 +61,6 @@ var XpathGenerator = {
      * Get node xpath, described by only current node, with class or id to locate the element
      */
     get_node_xpath: function(element){
-        console.log("[Xpath] Get node xpath");
         var tag = element.tagName.toLowerCase();
         var id = element.id;
         if (id != undefined && id != null && id.length > 0){
