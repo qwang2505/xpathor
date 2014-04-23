@@ -4,13 +4,26 @@ var XpathGenerator = {
 
     // good class name to locate an element
     _good_class_words: ["content", "cont", "txt", "body", "article", "item", "tit", "news", 
-        "list", "post", "summary", "smy", "info", "time", "source"],
+        "list", "post", "summary", "smy", "info", "time", "source", "detail"],
 
     /*
      * Get tag position in parent's children
      */
     get_child_tag_position: function(parent, elem){
-        return $(parent).children(elem.tagName).index(elem) + 1;
+        var children = $(parent).children();
+        var index = 0;
+        for (var i=0; i < children.length; i++){
+            var child = children[i];
+            if (child.tagName == elem.tagName){
+                index += 1;
+            }
+            if (child == elem){
+                break;
+            }
+        }
+        return index;
+        // TODO following code have exceptions
+        //return $(parent).children(elem.tagName).index(elem) + 1;
     },
 
     /*
@@ -97,6 +110,8 @@ var XpathGenerator = {
      * Get xpath by parents
      */
     _get_xpath_by_parents: function(xpath, parents){
+        console.log(parents);
+        console.log(xpath);
         parents = parents.reverse();
         for (var i=1; i < parents.length; i++){
             var pos = -1;
@@ -156,7 +171,7 @@ var XpathGenerator = {
      * the element with xpath
      */
     get_fixed_xpath: function(element){
-        try {
+        //try {
             element = this._normalize_element(element);
             // get xpath from current node, by id or class
             var xpath = this.get_node_xpath(element);
@@ -164,6 +179,7 @@ var XpathGenerator = {
                 return "//" + xpath;
             }
             // get xpath by parents
+            console.log(element);
             xpath = this.get_xpath_by_parents(element);
             if (xpath.length > 0){
                 return "//" + xpath;
@@ -172,9 +188,86 @@ var XpathGenerator = {
             // TODO get xpath by siblings
             // TODO get xpath by parent siblings
             return this.get_full_xpath(element);
-        } catch (err) {
-            console.log("[Xpath] error when get fixed xpath, " + err.name + ':' + err.message);
-            return "";
+        //} catch (err) {
+        //    console.log("[Xpath] error when get fixed xpath, " + err.name + ':' + err.message);
+        //    return "";
+        //}
+    },
+
+};
+
+var XpathEvaluator = {
+
+    // fill path with specific types to be used in python algorithm 
+    // type ---> postfix
+    // text ---> /text()
+    // attr ---> /@attr 
+    // full text ---> /text_content()
+    fill_xpath: function(ori, type, attr){
+        if (type == "text"){
+            ori += "/text()";
+        } else if (type == "full_text"){
+            ori += "/text_content()";
+        } else if (type == "attr") {
+            ori += "/@" + attr;
+        } else {
+            console.log("[Xpath] unknow xpath type: " + type);
+        }
+        return ori;
+    },
+
+    // extract result by xpath
+    evaluate: function(context, xpath){
+        if (xpath == NOT_SET){
+            return null;
+        }
+        if (this._is_text(xpath)){
+            return this._extract_text(context, xpath);
+        } else if (this._is_attr(xpath)){
+            return this._extract_text(context, xpath);
+        } else if (this._is_full_text(xpath)){
+            return this._extract_full_text(context, xpath);
+        } else {
+            return this._extract(context, xpath);
         }
     },
-}
+
+    // extract element
+    _extract: function(context, xpath){
+        return $(context).xpath(xpath);
+    },
+
+    _is_text: function(xpath){
+        return xpath.indexOf("/text()") == (xpath.length - "/text()".length);
+    },
+
+    // extract text result by xpath
+    _extract_text: function(context, xpath){
+        // extract elements first
+        var elem = $(context).xpath(xpath);
+        // get text of elements
+        if (0 in elem) {
+            elem = elem[0];
+        }
+        return elem.textContent;
+    },
+
+    _is_attr: function(xpath){
+        var xpaths = xpath.split("/");
+        var last = xpaths[xpaths.length - 1];
+        return last.indexOf("@") == 0;
+    },
+
+    _is_full_text: function(xpath){
+        return xpath.indexOf("/text_content()") == (xpath.length - "/text_content()".length);
+    },
+
+    // extract full text content of elem
+    _extract_full_text: function(context, xpath){
+        var xpaths = xpath.split("/");
+        xpaths = xpaths.slice(0, xpaths.length - 1);
+        xpath = xpaths.join("/");
+        var elem = $(context).xpath(xpath);
+        return elem.text();
+    },
+};

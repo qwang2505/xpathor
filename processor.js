@@ -18,11 +18,10 @@ var Processor = Class.extend({
     // share methods
     // stop to select element with mouse
     stop_select: function(message){
-        alert("stop select");
         $(window).unbind("mouseenter");
         $(window).unbind("mouseleave");
         $(window).unbind("click");
-        alert("stop select finished");
+        $(window).off("contextmenu");
     },
     // start to select element with mouse
     start_select: function(message, callback){
@@ -34,16 +33,26 @@ var Processor = Class.extend({
         });
         $(window).click(function(event){
             $(event.target).removeClass("xpathor-selection");
-            try {
+            //try {
                 // get xpath
                 var xpath = XpathGenerator.get_fixed_xpath(event.target);
-            } catch (err) {
-                console.log(err.name + ": " + err.message);
-                return false;
-            }
+            //} catch (err) {
+            //    console.log(err.name + ": " + err.message);
+            //    return false;
+            //}
             // TODO process xpath, pass to specific receiver
-            alert(xpath);
-            this.stop_select();
+            var item_name = message.item;
+            var obj = message.obj;
+            message.data[item_name] = xpath;
+            callback.call(obj, message);
+            return false;
+        });
+        $(window).bind("contextmenu", function(event){
+            $(event.target).removeClass("xpathor-selection");
+            var item_name = message.item;
+            var obj = message.obj;
+            message.data[item_name] = NOT_SET;
+            callback.call(obj, message);
             return false;
         });
     },
