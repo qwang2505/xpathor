@@ -1,54 +1,10 @@
 
-function extract_news(){
-	var inject  = document.createElement("div");
-	inject.innerHTML = "<div class='xpathor-tips' id='xpathor_tips'>Select Title</div></script>";
-	document.body.insertBefore (inject, document.body.firstChild);
-	setTimeout("$('#xpathor_tips').fadeOut('slow')", 3000);
-	// TODO start to select title
-	// TODO add click event handler for all elements in the website.
-	var message = {
-		type: "news",
-		data: {},
-	};
-	start_select("title");
-};
-
-// start to select element with mouse, need wait for user input
-function start_select(item_name){
-	$(window).mouseenter(function(event){
-		$(event.target).addClass("xpathor-selection");
-	});
-	$(window).mouseleave(function(event){
-		$(event.target).removeClass("xpathor-selection");
-	});
-	$(window).click(function(event){
-		$(event.target).removeClass("xpathor-selection");
-		try {
-			// get xpath
-			var xpath = XpathGenerator.get_fixed_xpath(event.target);
-		} catch (err) {
-			console.log(err.name + ": " + err.message);
-			return false;
-		}
-		// TODO process xpath, pass to specific receiver
-		alert(xpath);
-		stop_select();
-		return false;
-	});
-}
-
-// stop select element with mouse, exit user input process
-function stop_select(){
-	$(window).unbind("mouseenter");
-	$(window).unbind("mouseleave");
-	$(window).unbind("click");
-}
-
 // on status changed listener
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse){
         if (request.name == "extract_news"){
-			extract_news();
+			var processor = new NewsProcessor();
+			processor.start();
 			console.log("Extract news in main.js");
         } else if (request.name == "extract_links"){
 			console.log("Extract links in main.js");
