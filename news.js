@@ -7,6 +7,7 @@ var NewsProcessor = Processor.extend({
 	name: "news",
 
 	_tip_elem: null,
+	_preview_elem: null,
 
 	// arguments when extract text content from dom node, copy from python source
 	_args: {
@@ -143,6 +144,9 @@ var NewsProcessor = Processor.extend({
 		console.log("[News] next page xpath: " + message.data.next_page);
 		var template = new NewsTemplate(message.data);
 		var result = this.extract(template);
+		// TODO preview result
+		this._preview(result);
+		// TODO save extract result
 	},
 
 	// extract news detail by given template
@@ -161,6 +165,21 @@ var NewsProcessor = Processor.extend({
 		console.log("[News] get publish date: " + result.pubDate);
 		result.nextPage = XpathEvaluator.evaluate(document, XpathEvaluator.fill_xpath(template.nextPage, "full_text"));
 		console.log("[News] get next page: " + result.nextPage);
+		return result;
+	},
+
+	_save_result: function(result){
+
+	},
+
+	// preview extract result, put result in new div and show if need to.
+	_preview: function(result){
+		if (this._preview_elem == null){
+			$("body").append("<div class='xpathor-preview' id='xpathor-preview'>Preview</div>");
+			this._preview_elem = $("#xpathor-preview");
+		}
+		this._preview_elem.toggleClass("preview-show");
+		return;
 	},
 
 	_get_link_density: function(elem){
@@ -174,7 +193,7 @@ var NewsProcessor = Processor.extend({
 		}
 		var link_text = "";
 		for (var i=0; i < links.length; i++){
-			link_text += links[i].text().trim();
+			link_text += links[i].text.trim();
 		}
 		return link_text.length / text.length;
 	},
@@ -237,7 +256,8 @@ var NewsProcessor = Processor.extend({
 		var tags = ["p", "div", "span", "ul", "table", "select"];
 		var elements = $(clone).xpath(".//p | .//div | .//span | .//ul | .//table | .//select").toArray();
 		this._remove_unlikely_elem(elements);
-		return node;
+		// TODO return html temporary
+		return node.html();
 	},
 
 	// extract source text

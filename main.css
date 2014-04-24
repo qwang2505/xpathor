@@ -37,3 +37,21 @@
 	outline-offset: 1px;
 	z-index: 99999999;
 }
+
+.xpathor-preview {
+	background-color: #cccccc;	
+	position: fixed;
+	width: 90%;
+	font-family: arial;
+	font-size: 14px;
+	position: fixed;
+	right: -1px;
+	top: 10px;
+	z-index: 999999999;
+	transition: left 2s;
+	-webkit-transition: left 2s;
+}
+
+.preview-show {
+	left: 50px;
+}
