@@ -2,6 +2,11 @@ Object.prototype.toType = function() {
   return ({}).toString.call(this).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
 }
 
+String.prototype.endswith = function(str){
+	var index = this.indexOf(str);
+	return index == this.length - str.length;
+}
+
 
 // global var
 var NOT_SET = "NOT_SET";
@@ -46,3 +51,19 @@ function show(elem){
 	}
 	return result;
 };
+
+jQuery.fn.justtext = function() {
+	var first = $(this).prop("firstChild");
+	if (first == null || first == undefined){
+		return "";
+	}
+    return first.nodeValue == null ? "" : first.nodeValue;
+};
+
+jQuery.fn.tail = function(){
+	var next = $(this).prop("nextSibling");
+	if (next == null || next == undefined){
+		return "";
+	}
+	return next.nodeValue == null ? "" : next.nodeValue;
+}

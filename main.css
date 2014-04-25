@@ -39,19 +39,55 @@
 }
 
 .xpathor-preview {
-	background-color: #cccccc;	
+	background-image: url('chrome-extension://__MSG_@@extension_id__/preview_background.png');	
+	background-size: 100% 100%;
+	border-radius: 20px;
+	padding: 20px;
+	padding-left: 50px;
 	position: fixed;
-	width: 90%;
+	width: 70%;
 	font-family: arial;
 	font-size: 14px;
 	position: fixed;
-	right: -1px;
 	top: 10px;
 	z-index: 999999999;
-	transition: left 2s;
-	-webkit-transition: left 2s;
+	visibility: hidden;
+	opacity: 0;
+	transition: opacity 1s;
 }
 
-.preview-show {
-	left: 50px;
+.xpathor-preview.preview-show {
+	visibility: visible;
+	opacity: 1;
+}
+
+.xpathor-preview-news-header {
+	text-align: left;
+}
+
+.xpathor-preview-news-title {
+	font-size: 2em;
+	font-color: black;
+	font-weight: bold;
+}
+
+
+.xpathor-preview-news-title:before {
+	content: "标题 ";
+}
+
+.xpathor-preview-news-source {
+
+}
+
+.xpathor-preview-news-pubdate {
+
+}
+
+.xpahtor-preview-news-nextpage {
+
+}
+
+.xpathor-preview-news-content {
+
 }
