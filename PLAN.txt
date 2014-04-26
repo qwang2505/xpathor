@@ -1,0 +1,10 @@
+Here list some plans of xpathor for next step.
+
+1. Add image extracting, and show image while preview.
+2. extract by multiple templates and select the best result, just as what python code have done.
+
+
+big things:
+1. user login & auth
+2. upload/sync templates to/from server
+3. portal/roll templates and algorithms support.
