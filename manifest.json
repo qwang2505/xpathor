@@ -15,7 +15,7 @@
             "http://*/*",
             "https://*/*"
         ],
-        "js": ["jquery.js", "jquery.xpath.min.js", "md5.js", "class.js", "xpath.js", "definations.js", "processor.js", "news.js", "portal.js", "roll.js", "main.js"],
+        "js": ["jquery.js", "jquery.xpath.min.js", "storage.js", "md5.js", "class.js", "xpath.js", "definations.js", "processor.js", "news.js", "portal.js", "roll.js", "main.js"],
         "css": ["main.css"],
         "run_at": "document_end",
         "all_frames": false

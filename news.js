@@ -153,6 +153,9 @@ var NewsProcessor = Processor.extend({
 		console.log("[News] next page xpath: " + message.data.next_page);
 		var template = new NewsTemplate(message.data);
 		var result = this.extract(template);
+		// TODO valid result
+		// save temporary templates
+		XpathorStorage.save_temp_template(document.location.host, "news", template);
 		// TODO preview result
 		this._preview(result);
 		// TODO save extract result
@@ -175,6 +178,26 @@ var NewsProcessor = Processor.extend({
 		result.nextPage = XpathEvaluator.evaluate(document, XpathEvaluator.fill_xpath(template.nextPage, "full_text"));
 		console.log("[News] get next page: " + result.nextPage);
 		return result;
+	},
+
+	_preview_by_templates: function(result){
+		if (result[document.location.host].length == 0){
+			alert("no template for this site");
+			return;
+		}
+		// TODO use first template for now 
+		var template = result[document.location.host][0];
+		console.log("get template: ");
+		console.log(template);
+		console.log(this.extract);
+		var result = this.extract(template);
+		this._preview(result);
+	},
+
+	// preview extracting result
+	preview: function(){
+		// get template from local storage
+		XpathorStorage.load_temp_template(document.location.host, "news", this._preview_by_templates, this);
 	},
 
 	_save_result: function(result){

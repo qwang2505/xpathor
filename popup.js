@@ -24,8 +24,19 @@ function login(){
 	window.close();
 }
 
+function preview(){
+    console.log("[Popup] preview");
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {name: "preview_news"}, function(response) {
+            console.log("[Popup] Response from preview_news: " + response.success);
+        });
+    });
+    window.close();
+}
+
 document.addEventListener('DOMContentLoaded', function () {
 	document.getElementById("extract_news_btn").addEventListener('click', extract_news);
 	document.getElementById("extract_link_btn").addEventListener('click', extract_links);
 	document.getElementById("login_btn").addEventListener('click', login); 
+    document.getElementById("preview_result").addEventListener('click', preview); 
 });
