@@ -7,6 +7,10 @@ String.prototype.endswith = function(str){
 	return index == this.length - str.length;
 }
 
+String.prototype.startswith = function(str){
+	return this.indexOf(str) == 0;
+}
+
 
 // global var
 var NOT_SET = "NOT_SET";

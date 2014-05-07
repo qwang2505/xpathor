@@ -1,4 +1,110 @@
 /*
+ * Simple image extractor, extract images from content dom node.
+ * Rewrite from python code.
+ */
+var ImageExtractor = {
+
+	_args: {
+		valid_size_threshold: 50,
+		valid_ratio_threshold: 5,
+		min_width: 50,
+		min_height: 50,
+	},
+
+	/*
+	 * Default handle src function, get image link from src attribute.
+	 */
+	_handle_src_func: function(node){
+		return $(node).attr("src");
+	},
+
+	_validate_img_src: function(src){
+		return src != null && src != undefined && src.length > 0 && !src.startswith("data:") && !src.startswith("file:");
+	},
+
+	_validate_image: function(image, src){
+		console.log("valid image: ");
+		console.log(image);
+		var response = {};
+		var width = $(image).width();
+		var height = $(image).height();
+		console.log("width: " + width + ", height: " + height);
+		response.width = width;
+		response.height = height;
+		if (width == 0 && height == 0){
+			response.valid = true;
+			console.log("get image size failed, seem as valid");
+			return response;
+		} else if (width < this._args.valid_size_threshold || height < this._args.valid_size_threshold){
+			response.valid = false;
+			console.log("validate image failed, width or height small");
+			return response;
+		} else if (width / height > this._args.valid_ratio_threshold){
+			response.valid = false;
+			console.log("validate image failed, ration large");
+			return response;
+		} else {
+			response.valid = true;
+			return response;
+		}
+	},
+
+	_score_image: function(image, src, width, height){
+		var score = 2;
+		if (width < this._args.min_width || height < this._args.min_height){
+			score -= 100;
+		} else if (width > this._args.min_width && height > this._args.min_height){
+			score += 10;
+		}
+		// TODO need copy more logic from python code
+		return score;
+	},
+
+	/*
+	 * main API of ImageExtractor.
+	 */
+	extract_images: function(node){
+		console.log("extract images from ");
+		console.log(node);
+		var pictures = [];
+		if (node == null || node == undefined){
+			return pictures;
+		}
+		//var imgs = XpathEvaluator.evaluate(node, ".//img");
+		var imgs = $(node).xpath(".//img").toArray();
+		if (imgs == null || imgs == undefined || imgs.length == 0){
+			return pictures;
+		}
+		console.log("got images ");
+		console.log(imgs);
+		var result, score, image;
+		for (var i=0; i < imgs.length; i++){
+			var src = this._handle_src_func(imgs[i]);
+			if (this._validate_img_src(src)){
+				// valid image src
+				result = this._validate_image(imgs[i], src);
+				if (!result.valid){
+					continue;
+				}
+				score = this._score_image(imgs[i], src, result.width, result.height);
+				image = {
+					url: src,
+					id: Math.uuid(),
+					score: score,
+					width: result.width,
+					height: result.height,
+					node: imgs[i],
+				};
+				pictures.push(image);
+			}
+		}
+		// TODO sort by score
+		return pictures;
+	}
+};
+
+
+/*
  * NewsProcessor, to process news extracting.
  */
 
@@ -17,7 +123,7 @@ var NewsProcessor = Processor.extend({
 		strongTags: ["STRONG", "B"],
 		noTextTags: ["SCRIPT", "NOSCRIPT", "STYLE", "IFRAME"],
 		chineseRe: /[\u4e00-\u9fa5]+/i,
-		imageRe: /<dolphinimagestart--([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})--dolphinimageend>/i,
+		imageRe: /(dolphinimagestart--([0-9a-fA-F]{8})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-([0-9a-fA-F]{12})--dolphinimageend)/i,
 		oriTitleRe: /\u539f\u6807\u9898(:|\uff1a)/i,
 		urlRe: /(http:\/\/|https:\/\/){0,1}[A-Za-z0-9][A-Za-z0-9\-\.]+[A-Za-z0-9]\.[A-Za-z]{2,}[\43-\176]*/i,
 		unlikelyKeywordRe: /\s*(\uff08|\u3010|\(|\[)\s*(\u5b98\u65b9)?\u5fae\u535a\s*(\u6570\u636e|\u535a\u5ba2)*\s*(\uff09|\u3011|\)|\])\s*/i,
@@ -242,6 +348,8 @@ var NewsProcessor = Processor.extend({
 
 	_get_link_density: function(elem){
 		var text = elem.text().trim();	
+		// sub image text
+		text = text.replace(this._args.imageRe, "");
 		if (text == null || text.length == 0){
 			return 0.0;
 		}
@@ -251,7 +359,7 @@ var NewsProcessor = Processor.extend({
 		}
 		var link_text = "";
 		for (var i=0; i < links.length; i++){
-			link_text += links[i].text.trim();
+			link_text += links[i].text.trim().replace(this._args.imageRe, "");
 		}
 		return link_text.length / text.length;
 	},
@@ -273,7 +381,7 @@ var NewsProcessor = Processor.extend({
 			text = elem.text().trim();
 			lis = elem.xpath("li").length;
 			ps = elem.xpath("p").length;
-			imgs = elem.xpath("img").length;
+			imgs = elem.xpath("img").length + text.split("dolphinimagestart").length - 1;
 			path = elem.attr("class") + " " + elem.attr("id");
 
 			match = this._args.unlikelyRe.exec(path);
@@ -288,7 +396,7 @@ var NewsProcessor = Processor.extend({
 				unlikely_elems.push(elements[i]);
 				continue;
 			} else if (link_density > 0.4 && imgs == 0 && text.length > 30){
-				console.log("[ContentExtractor] remove because link density high and no image and long text: ");
+				console.log("[ContentExtractor] remove because link density high and no image and long text: link density: " + link_density);
 				console.log(elements[i]);
 				unlikely_elems.push(elements[i]);
 				continue;
@@ -498,20 +606,33 @@ var NewsProcessor = Processor.extend({
 	// extract content from dom node, rewrite from python source
 	_extract_content: function(node){
 		var clone = $(node).clone();
+		// extract images from content node
+		var pictures = ImageExtractor.extract_images(clone);
+		console.log("got " + pictures.length + " images from content node");
+		for (var i=0; i < pictures.length; i++){
+			$(pictures[i].node).replaceWith("(dolphinimagestart--" + pictures[i].id + "--dolphinimageend)");
+		}
+		console.log(clone.html());
+
 		var tags = ["p", "div", "span", "ul", "table", "select"];
 		var elements = $(clone).xpath(".//p | .//div | .//span | .//ul | .//table | .//select").toArray();
 		this._remove_unlikely_elem(elements);
 		var content = this._get_content(clone);
+		console.log(content);
 		var chinese = this._args.chineseRe.exec(content) != null;
 		var min_length = chinese ? 40 : 20;
 		var content_list = this._remove_unlikely_paragraph(content.split("\n"), min_length);
 		content = content_list.join("\n\n");
+		console.log(content);
 		// remove unlikely keyword
 		content = this._remove_unlikely_keyword(content);
+		console.log(content);
 		// remove extra paragraph
 		content = content.replace(this._args.paragraphRe, "\n\n");
+		console.log(content);
 		// wrap content with html tags
 		content = this._wrap_content(content);
+		console.log(content);
 		return content;
 	},
 
