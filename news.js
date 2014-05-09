@@ -134,6 +134,9 @@ var NewsProcessor = Processor.extend({
 	// TODO copy from python code, just contains chinese, so maybe need to improve
 	_source_re: /.*(?:\u7a3f\u6e90|\u6765\u6E90\u4E8E\uFF1A|\u6765\u81ea\uFF1A|\u6765\u81ea|\u6765\u6E90|\u6765\u6E90\uFF1A|\u51fa\u5904\uFF1A|\u6765\u6e90\u4e8e)[\s\xa0]*(?:\:|\uff1a|\/)?(?:\s\xa0)*(.*?)[\u8D5E\u3010\u3000 -_\|\s\xa0].*/i,
 
+	_img_placeholder_re: /(\(dolphinimagestart\-\-.*?\-\-dolphinimageend\))/gi,
+	_img_placeholder_re_no_match: /\(dolphinimagestart\-\-.*?\-\-dolphinimageend\)/gi,
+
 	// time regex, copy from python source
 	_time_res: {
 		all: [
@@ -592,15 +595,45 @@ var NewsProcessor = Processor.extend({
 		return content.replace(this._args.unlikelyKeywordRe, "");
 	},
 
+	_wrap_paragraph: function(paragraph){
+		var paras = paragraph.split(this._img_placeholder_re_no_match);
+		var matches = [], found;
+		var reg = this._img_placeholder_re;
+		while (found = reg.exec(paragraph)){
+			matches.push(found[0]);
+			console.log("got image: " + found[0]);
+			reg.lastIndex = found.index + 1;
+		}
+		var new_para = "";
+		for (var i=0; i < paras.length; i++){
+			console.log("process paragraph: " + paras[i]);
+			if (paras[i].length > 0){
+				new_para += "<p>" + paras[i] + "</p>";
+			}
+			if (i < matches.length){
+				new_para += matches[i];
+			}
+		}
+		return new_para;
+	},
+
 	// wrap content with html tags
 	_wrap_content: function(content){
 		// temporary, just wrap paragraphs with p
-		var contents = content.split("\n\n");
-		var new_content = "";
-		for (var i=0; i < contents.length; i++){
-			new_content += "<p>" + contents[i] + "</p>";
+		var paragraphs = content.split("\n\n");
+		var new_paragraphs = [];
+		for (var i=0; i < paragraphs.length; i++){
+			new_paragraphs.push(this._wrap_paragraph(paragraphs[i]));
 		}
-		return new_content;
+		return new_paragraphs.join("");
+	},
+
+	_replace_images: function(content, pictures){
+		for (var i=0; i < pictures.length; i++){
+			content = content.replace("(dolphinimagestart--" + pictures[i].id + "--dolphinimageend)", 
+				"<div><img style='margin: 0 auto; display: block' src='" + pictures[i].url + "'></img></div>");
+		}
+		return content;
 	},
 
 	// extract content from dom node, rewrite from python source
@@ -632,6 +665,8 @@ var NewsProcessor = Processor.extend({
 		console.log(content);
 		// wrap content with html tags
 		content = this._wrap_content(content);
+		// replace images in content
+		content = this._replace_images(content, pictures);
 		console.log(content);
 		return content;
 	},

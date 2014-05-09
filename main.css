@@ -55,7 +55,7 @@
 	visibility: hidden;
 	opacity: 0;
 	transition: opacity 1s, visibility 1s;
-	box-shadow: 10px 10px 5px #888888;
+	box-shadow: 5px 5px 2px #888888;
 }
 
 .xpathor-preview.preview-show {
