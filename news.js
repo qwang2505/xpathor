@@ -187,6 +187,8 @@ var NewsProcessor = Processor.extend({
 			this._tip_elem.className = "xpathor-tips";
 			document.body.insertBefore (this._tip_elem, document.body.firstChild);
 
+		} else {
+			$("#xpathor_tips").show();
 		}
 		//this._tip_elem.innerHTML = "<div class='xpathor-tips-wrapper'><div class='xpathor-tips' id='xpathor_tips'>Select " + this._tip_map[item_name] + "</div></div>";
 		this._tip_elem.innerHTML = "Select " + this._tip_map[item_name];

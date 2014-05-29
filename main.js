@@ -5,8 +5,8 @@ var _processors = {};
 // on status changed listener
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse){
+        var processor;
         if (request.name == "extract_news"){
-        	var processor;
         	if ("news_processor" in _processors){
         		processor = _processors["news_processor"];
         	} else {
@@ -16,7 +16,6 @@ chrome.runtime.onMessage.addListener(
 			processor.start();
 			console.log("Extract news in main.js");
 		} else if (request.name == "preview_news"){
-			var processor;
         	if ("news_processor" in _processors){
         		processor = _processors["news_processor"];
         	} else {
@@ -26,12 +25,17 @@ chrome.runtime.onMessage.addListener(
         	processor.preview();
 			console.log("Preview news in main.js");
         } else if (request.name == "extract_links"){
-			console.log("Extract links in main.js");
-        } else if (request.name == "extract_links_from_portal"){
+            if ("portal_processor" in _processors){
+                processor = _processors["portal_processor"];
+            } else {
+                processor = new PortalProcessor();
+                _processors["portal_processor"] = processor;
+            }
+            processor.start();
 			console.log("Extract links from portal in main.js");
-        } else if (request.name == "extract_links_from_roll"){
-			console.log("Extract links from roll in main.js");
-        }
+        } else {
+            console.log("Unknow request: " + request.name);
+        } 
 		sendResponse({success: true});
     }
 );

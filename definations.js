@@ -11,6 +11,15 @@ String.prototype.startswith = function(str){
 	return this.indexOf(str) == 0;
 }
 
+Array.prototype.index = function(elem){
+	for (var i=0; i < this.length; i++){
+		if (this[i] == elem){
+			return i;
+		}
+	}
+	return -1;
+}
+
 
 // global var
 var NOT_SET = "NOT_SET";
