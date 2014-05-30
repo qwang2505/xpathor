@@ -133,3 +133,27 @@ a.xpathor-boxclose{
 .xpathor-boxclose:before {
     content: "×";
 }
+
+.xpathor-dialog {
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	width: 500px;	
+	height: 400px;
+	margin-top: -300px;
+	margin-left: -200px;
+	background: -webkit-gradient(linear, left top, right top, from(#dddddd),color-stop(0.25, #cccccc), color-stop(0.5, #dddddd), color-stop(0.75, #cccccc), to(#dddddd));
+	z-index: 9999999;
+	border-radius: 20px;
+	padding: 20px;
+	padding-left: 50px;
+	padding-right: 50px;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 1s, visibility 1s;
+	box-shadow: 5px 5px 2px #aaaaaa;
+}
+.xpathor-dialog.dialog-show {
+	visibility: visible;
+	opacity: 1;
+}

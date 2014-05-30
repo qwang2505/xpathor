@@ -8,14 +8,17 @@ var PortalProcessor = Processor.extend({
 
 	_tip_elem: null,
 	_preview_elem: null,
+	_dialog_elem: null,
 
 	_step_map: {
 		start: "block",
-		block: "headline",
+		block: "news",
+		news: "headline",
 	},
 
 	_tip_map: {
 		block: "News Block",
+		news: "Normal News",
 		headline: "Headline News",
 	},
 
@@ -91,13 +94,41 @@ var PortalProcessor = Processor.extend({
 
 	// pre process, like run algorithm to get xpath, etc.
 	pre_process: function(){
+		// create dialog to let user select category, news status, headline status, etc.
+		if (this._dialog_elem == null){
+			$("body").append('<div id="xpathor_dialog" class="xpathor-dialog"></div>');
+			this._dialog_elem = $("#xpathor_dialog");
+		}
 		return;
+	},
+
+	// in portal algorithm, single block xpath may select multiple blocks,
+	// but we use index to select the only block user selected.
+	_get_block_index: function(xpath, block){
+		var blocks = XpathEvaluator.evaluate(document, xpath);
+		for (var i=0; i < blocks.length; i++){
+			if (blocks[i] == block){
+				return i;
+			}
+		}
+		// if reach here, something wrong happened
+		return -1;
 	},
 
 	// post process data, preview, etc.
 	post_process: function(message){
+		// use generated xpath to extract block to get index of news block
+		message.data.index = this._get_block_index(message.data.block, message.block);
+		if (message.data.index == -1){
+			alert("can not find block with block xpath, please contact the developer");
+			return;
+		}
+		// prompt dislog to let user select category, status, headline status
+		$("#xpathor_dialog").toggleClass("dialog-show");
 		// log xpath
 		console.log("block: " + message.data.block);
+		console.log("index: " + message.data.index);
+		console.log("news: " + message.data.news);
 		console.log("headline: " + message.data.headline);
 	},
 
@@ -117,9 +148,14 @@ var PortalProcessor = Processor.extend({
                 if (message.item == "block"){
 	                xpath = xpath = xpathor.get_fixed_xpath(event.target);
 	                message.block = xpathor.normalize_element(event.target);
+	            } else if (message.item == "news"){
+	            	var block = message.block;
+	                xpath = xpathor.get_news_xpath(event.target, block, false);	
+	                message.news = event.target;
 	            } else if (message.item == "headline"){
 	            	var block = message.block;
-	                xpath = xpathor.get_news_xpath(event.target, block);            	
+	            	// TODO get headline xpath
+	                xpath = xpathor.get_headline_xpath(event.target, block, message.news, message.data.news);	
 	            }
             //} catch (err) {
             //    console.log(err.name + ": " + err.message);

@@ -231,7 +231,8 @@ var XpathGenerator = Class.extend({
  */
 var BlockXpathGenerator = XpathGenerator.extend({
 
-    _good_news_parent_tags: ["UL", "LI", "H1", "H2", "H3", "H4", "H5", "H6"],
+    _good_news_parent_tags: ["UL", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "P", "SPAN", "DD"],
+    _good_headline_parent_tags: ["UL", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "STRONG", "B", "DT"],
 
     /*
      * Get node xpath, described by only current node, with class or id to locate the element
@@ -242,6 +243,21 @@ var BlockXpathGenerator = XpathGenerator.extend({
             return "";
         }
         tag = element.tagName.toLowerCase();
+        // TODO get by data-* attributes
+        var attrs = element.attributes;
+        var attr;
+        for (var i=0; i < attrs.length; i++){
+            attr = attrs.item(i);
+            if (attr.nodeName.startswith("data")){
+                var name = attr.nodeName;
+                var value = attr.nodeValue;
+                if (value.length == 0){
+                    continue;
+                }
+                var new_xpath = element.tagName.toLowerCase() + "[@" + name + "=\"" + value + "\"]";
+                return new_xpath;
+            }
+        }
         var id = element.id;
         if (id != undefined && id != null && id.length > 0){
             // get by id
@@ -331,7 +347,7 @@ var BlockXpathGenerator = XpathGenerator.extend({
         return false;
     },
 
-    get_news_xpath: function(element, block){
+    get_news_xpath: function(element, block, headline){
         console.log("element");
         console.log(element);
         console.log("block");
@@ -342,26 +358,27 @@ var BlockXpathGenerator = XpathGenerator.extend({
                 return "a";
             } else {
                 var parent = element.parentNode;
-                if (this._good_news_parent_tags.indexOf(parent.tagName) == -1){
-                    return this._get_news_xpath_by_parent(parent, block, "a"); 
+                var parent_tags = headline ? this._good_headline_parent_tags : this._good_news_parent_tags;
+                if (parent_tags.indexOf(parent.tagName) == -1){
+                    return this._get_news_xpath_by_parent(parent, block, "a", headline); 
                 } else {
-                    return parent.tagName + "/" + "a";
+                    return parent.tagName.toLowerCase() + "/" + "a";
                 }
             }
         }
-        // TODO first find 'A' in selected element, than use it to get xpath
         var postfix;
         if (this._has_link_children(element)){
             postfix = "/a";
         } else {
             postfix = "//a";
         }
-        var xpath = this._get_news_xpath_by_parent(element, block, "");
+        // get reletive xpath of parent and then add /a or //a to get news links
+        var xpath = this._get_news_xpath_by_parent(element, block, "", headline);
         return xpath + postfix;
     },
 
-    // get news xpaht by parent node
-    _get_news_xpath_by_parent: function(element, block, xpath){
+    // get news xpaht by parent node, all tag names, do not use class or id in news xpath
+    _get_news_xpath_by_parent: function(element, block, xpath, headline){
         var parent = element.parentNode;
         var new_xpath;
         if (xpath.length == 0){
@@ -372,13 +389,160 @@ var BlockXpathGenerator = XpathGenerator.extend({
         if (parent == block){
             return new_xpath;
         }
-        if (this._good_news_parent_tags.indexOf(element.tagName) != -1){
+        parent_tags = headline ? this._good_headline_parent_tags : this._good_news_parent_tags;
+        if (parent_tags.indexOf(element.tagName) != -1){
             return ".//" + new_xpath;
         }
-        if (this._good_news_parent_tags.indexOf(parent.tagName) != -1){
-            return parent.tagName.toLowreCase() + "/" + new_xpath;
+        if (parent_tags.indexOf(parent.tagName) != -1){
+            return parent.tagName.toLowerCase() + "/" + new_xpath;
         }
-        return this._get_news_xpath_by_parent(parent, block, new_xpath);
+        return this._get_news_xpath_by_parent(parent, block, new_xpath, headline);
+    },
+
+    // validate headline xpath by evaluating headline xpath and compare with news element
+    _validate_headline_xpath: function(xpath, block, news_element){
+        console.log("validate headline xpath: " + xpath);
+        var elements = XpathEvaluator.evaluate(block, xpath);
+        for (var i=0; i < elements.length; i++){
+            if (elements[i] == news_element){
+                return false;
+            }
+        }
+        return true;
+    },
+
+    _get_headline_xpath_by_attr: function(element, block, xpath, news_element){
+        // TODO get xpath by data-* attribute
+        var attrs = element.attributes;
+        var attr;
+        for (var i=0; i < attrs.length; i++){
+            attr = attrs.item(i);
+            if (attr.nodeName.startswith("data")){
+                var name = attr.nodeName;
+                var value = attr.nodeValue;
+                var new_xpath = element.tagName.toLowerCase() + "[@" + name + "=\"" + value + "\"]";
+                if (xpath.length > 0){
+                    new_xpath += "/" + xpath;
+                }
+                if (parent != block){
+                    new_xpath = ".//" + new_xpath;
+                }
+                if (this._validate_headline_xpath(new_xpath, block, news_element)){
+                    return new_xpath;
+                } 
+            }
+        }
+        var id = element.id;
+        var parent = element.parentNode;
+        if (id.length > 0){
+            var new_xpath = element.tagName.toLowerCase() + "[@id=\"" + id + "\"]";
+            if (xpath.length > 0){
+                new_xpath += "/" + xpath;
+            }
+            if (parent != block){
+                new_xpath = ".//" + new_xpath;
+            }
+            if (this._validate_headline_xpath(new_xpath, block, news_element)){
+                return new_xpath;
+            }
+        }
+        var clas = element.className;
+        if (clas.length > 0){
+            // TODO split class name
+            var new_xpath = element.tagName.toLowerCase() + "[@class=\"" + clas + "\"]";
+            if (xpath.length > 0){
+                new_xpath += "/" + xpath;
+            }
+            if (parent != block){
+                new_xpath = ".//" + new_xpath;
+            }
+            if (this._validate_headline_xpath(new_xpath, block, news_element)){
+                return new_xpath;
+            } 
+        }
+        // TODO get xpath by data-* attribute
+        return "";
+    },
+
+    // get headline xpath by parent, and validate after xpath generating.
+    // we already get headline xpath by tag names in get_news_xpath, so here
+    // just use attribute to locate headline element
+    _get_headline_xpath_by_parent: function(element, block, xpath, news_element){
+        var new_xpath = this._get_headline_xpath_by_attr(element, block, xpath, news_element);
+        if (new_xpath.length > 0){
+            return new_xpath;
+        }
+        if (element.parentNode == block){
+            // can not get specific xpath to extract headline, return empty xpath
+            return "";
+        }
+        if (xpath.length > 0){
+            new_xpath = element.tagName.toLowerCase() + "/" + xpath;
+        } else {
+            new_xpath = element.tagName.toLowerCase();
+        }
+        return this._get_headline_xpath_by_parent(element.parentNode, block, new_xpath, news_element);
+    },
+
+    /*
+     * Get headline xpath, need to pass in news item and news xpath to compare
+     */
+    get_headline_xpath: function(element, block, news_item, news_item_xpath){
+        // get xpath with get_news_xpath. If get different xpath with news_item_xpath, use it.
+        // remember, in get_news_xpath, just use tagName in xpath, no class or id or other attribute.
+        if (news_item_xpath.length > 0 && news_item_xpath != "NOT_SET"){
+            var xpath = this.get_news_xpath(element, block, true);
+            if (xpath.length > 0 && xpath != news_item_xpath && this._validate_headline_xpath(xpath, block, news_item)){
+                return xpath;
+            }
+        }
+        if (element.tagName == "A"){
+            if (element.parentNode == block){
+                if (news_item_xpath != "a"){
+                    return "a";
+                } else {
+                    // headline xpath same with news item xpath, all a, so failed to 
+                    // get headline xpath, return empty xpath
+                    return "";
+                }
+            } else {
+                var parent = element.parentNode;
+                if (this._good_headline_parent_tags.indexOf(parent.tagName) == -1){
+                    // get by parent
+                    return this._get_headline_xpath_by_parent(parent, block, "a", news_item);
+                } else {
+                    xpath = parent.tagName.toLowerCase() + "/a";
+                    if (xpath != news_item_xpath){
+                        return xpath;
+                    } else {
+                        return this._get_headline_xpath_by_parent(parent, block, "a", news_item);
+                    }
+                }
+            }
+        }
+        var postfix;
+        if (this._has_link_children(element)){
+            postfix = "/a";
+        } else {
+            postfix = "//a";
+        }
+        // get reletive xpath of parent and then add /a or //a to get news links
+        var xpath = this._get_headline_xpath_by_parent(element, block, "", news_item);
+        if (xpath.length > 0){
+            return xpath + postfix;
+        } else if (news_item_xpath.length == 0 || news_item_xpath == "NOT_SET") {
+            // failed to generate xpath for headline use attribute, and news item not selected, here
+            // try again use tag names to generate xpath for headline 
+            xpath = this.get_news_xpath(element, block, true);
+            if (xpath.length > 0 && xpath != news_item_xpath && this._validate_headline_xpath(xpath, block, news_item)){
+                return xpath;
+            }
+            return "";
+        } else {
+            // generate xpath for headline failed and news item xpath not empty or not set,
+            // return empty xpath for headline.
+            return "";
+        }
     },
 });
 
