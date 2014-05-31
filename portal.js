@@ -6,6 +6,8 @@ var PortalProcessor = Processor.extend({
 
 	name: "portal",
 
+	message: null,
+
 	_tip_elem: null,
 	_preview_elem: null,
 	_dialog_elem: null,
@@ -21,6 +23,15 @@ var PortalProcessor = Processor.extend({
 		news: "Normal News",
 		headline: "Headline News",
 	},
+
+	_default_selection: '-1',
+	_category_selection: '<select class="dialog-select"><option value="-1" selected>------</option><option value="1">Important News</option>' + 
+						'<option value="2">International</option><option value="3">National</option>' + 
+						'<option value="4">Society</option><option value="5">Entertainment</option>' +
+						'<option value="6">Sport</option><option value="7">Finance</option>' +
+						'<option value="8">Technology</option></select>',
+	_priority_selection: '<select class="dialog-select"><option value="-1" selected>------</option><option value="8">P0</option>' +
+						 '<option value="0">P1</option><option value="4">P2</option></select>',
 
 	show_tip: function(item_name){
 		if (this._tip_elem == null){
@@ -62,6 +73,7 @@ var PortalProcessor = Processor.extend({
 			item: "start",
 			obj: this,
 			data: {},
+			blocks: [],
 		};
 		this.next(message);
 	},
@@ -94,11 +106,6 @@ var PortalProcessor = Processor.extend({
 
 	// pre process, like run algorithm to get xpath, etc.
 	pre_process: function(){
-		// create dialog to let user select category, news status, headline status, etc.
-		if (this._dialog_elem == null){
-			$("body").append('<div id="xpathor_dialog" class="xpathor-dialog"></div>');
-			this._dialog_elem = $("#xpathor_dialog");
-		}
 		return;
 	},
 
@@ -115,6 +122,68 @@ var PortalProcessor = Processor.extend({
 		return -1;
 	},
 
+	_next_block: function(message){
+		if(confirm("Continue to select anothor block?")){
+			message.item = "start";
+			this.next(message);
+		} else {
+			this._finish_blocks(message);
+		}
+	},
+
+	_create_select_dialog: function(callback){
+		// create dialog to let user select category, news status, headline status, etc.
+		if (this._dialog_elem == null){
+			$("body").append('<div id="xpathor_dialog" class="xpathor-dialog">' + 
+				'<div id="xpathor_dialog_selection_category" class="selection-block category">' + this._category_selection + '</div>' + 
+				'<div id="xpathor_dialog_selection_headline" class="selection-block headline">' + this._priority_selection + '</div>' +
+				'<div id="xpathor_dialog_selection_normal" class="selection-block normal">' + this._priority_selection + '</div>' +
+				'<div class="selection-buttons"><input type="button" value="取消" id="xpathor_dialog_cancel" class="xpathor-dialog-button"></input>' + 
+				'<input type="button" value="确定" id="xpathor_dialog_confirm" class="xpathor-dialog-button confirm"></input></div>' +
+				'</div>');
+			// add event listener for buttons
+			var obj = this;
+			$("#xpathor_dialog_cancel").click(function(){
+				$("#xpathor_dialog").toggleClass("dialog-show");
+				return false;
+			});
+			$("#xpathor_dialog_confirm").click(function(){
+				var cate = $("#xpathor_dialog_selection_category .dialog-select").val();
+				if (cate == "-1"){
+					alert("Please select category of news block!");
+					return;
+				}
+				var headline_p = $("#xpathor_dialog_selection_headline .dialog-select").val();
+				if (headline_p == "-1"){
+					alert("Please select priority of headline news!");
+					return;
+				}
+				var normal_p = $("#xpathor_dialog_selection_normal .dialog-select").val();
+				if (normal_p == "-1"){
+					alert("Please select priority of normal news!");
+					return;
+				}
+				obj.message.data.category = cate;
+				obj.message.data.headline_priority = headline_p;
+				obj.message.data.normal_priority = normal_p;
+				// save blocks
+				var block = {};
+				block.block = obj.message.data.block;
+				block.news = obj.message.data.news;
+				block.headline = obj.message.data.headline;
+				block.index = obj.message.data.index;
+				block.category = obj.message.data.category;
+				block.headline_priority = obj.message.data.headline_priority;
+				block.normal_priority = obj.message.data.normal_priority;
+				obj.message.blocks.push(block);
+				$("#xpathor_dialog").toggleClass("dialog-show");
+				callback.call(obj, obj.message);
+				return false;
+			});
+			this._dialog_elem = $("#xpathor_dialog");
+		}
+	},
+
 	// post process data, preview, etc.
 	post_process: function(message){
 		// use generated xpath to extract block to get index of news block
@@ -123,13 +192,37 @@ var PortalProcessor = Processor.extend({
 			alert("can not find block with block xpath, please contact the developer");
 			return;
 		}
+		// save selected data and generated xpath
+		this.message = message;
 		// prompt dislog to let user select category, status, headline status
+		this._create_select_dialog(this._next_block);
 		$("#xpathor_dialog").toggleClass("dialog-show");
+	},
+
+	_finish_blocks: function(message){
 		// log xpath
-		console.log("block: " + message.data.block);
-		console.log("index: " + message.data.index);
-		console.log("news: " + message.data.news);
-		console.log("headline: " + message.data.headline);
+		// alert template
+		var template = '    "' + document.location.href + '": [\n';
+		for (var i=0; i < message.blocks.length; i++){
+			template += '        {\n';
+			template += '            "block": \'' + message.blocks[i].block + '\',\n';
+			template += '            "index": '+ message.blocks[i].index + ',\n';
+			template += '            "category": ' + message.blocks[i].category + ',\n';
+			template += '            "news": \'' + message.blocks[i].news + '\',\n';
+			template += '            "headline": \'' + message.blocks[i].headline + '\',\n';
+			template += '            "headline_status": ' + message.blocks[i].headline_priority + ',\n';
+			template += '            "status": ' + message.blocks[i].normal_priority + ',\n';
+			template += '        },\n';
+			console.log("block: " + message.blocks[i].block);
+			console.log("index: " + message.blocks[i].index);
+			console.log("news: " + message.blocks[i].news);
+			console.log("headline: " + message.blocks[i].headline);
+			console.log("category: " + message.blocks[i].category);
+			console.log("headline priority: " + message.blocks[i].headline_priority);
+			console.log("normal priority: " + message.blocks[i].normal_priority);
+		}
+		template += '    ],\n';
+		console.log(template);
 	},
 
     start_select: function(message, callback){
@@ -146,7 +239,7 @@ var PortalProcessor = Processor.extend({
                 var xpathor = new BlockXpathGenerator();
                 var xpath;
                 if (message.item == "block"){
-	                xpath = xpath = xpathor.get_fixed_xpath(event.target);
+	                xpath = xpathor.get_fixed_xpath(event.target);
 	                message.block = xpathor.normalize_element(event.target);
 	            } else if (message.item == "news"){
 	            	var block = message.block;

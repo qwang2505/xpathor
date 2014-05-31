@@ -138,16 +138,16 @@ a.xpathor-boxclose{
 	position: fixed;
 	left: 50%;
 	top: 50%;
-	width: 500px;	
-	height: 400px;
-	margin-top: -300px;
+	width: 400px;	
+	height: 120px;
+	margin-top: -200px;
 	margin-left: -200px;
 	background: -webkit-gradient(linear, left top, right top, from(#dddddd),color-stop(0.25, #cccccc), color-stop(0.5, #dddddd), color-stop(0.75, #cccccc), to(#dddddd));
 	z-index: 9999999;
-	border-radius: 20px;
+	border-radius: 10px;
 	padding: 20px;
-	padding-left: 50px;
-	padding-right: 50px;
+	padding-left: 30px;
+	padding-right: 0px;
 	opacity: 0;
 	visibility: hidden;
 	transition: opacity 1s, visibility 1s;
@@ -156,4 +156,43 @@ a.xpathor-boxclose{
 .xpathor-dialog.dialog-show {
 	visibility: visible;
 	opacity: 1;
+}
+
+.dialog-select {
+	width: 200px;
+}
+
+.selection-block {
+	width: 90%;
+}
+.selection-block.category:before {
+	content: "Category";
+	padding-right: 112px;
+}
+
+.selection-block.headline:before {
+	content: "Headline News Priority";
+	padding-right: 28px;
+}
+
+.selection-block.normal:before {
+	content: "Normal News Priority";
+	padding-right: 40px;
+}
+
+.selection-buttons {
+	margin-top: 20px;
+}
+
+.xpathor-dialog-button {
+	width: 80px;
+	height: 30px;
+	background-color: #eeeeee;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.xpathor-dialog-button.confirm {
+	float: right;
+	margin-right: 40px;
 }
