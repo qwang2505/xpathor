@@ -138,8 +138,8 @@ a.xpathor-boxclose{
 	position: fixed;
 	left: 50%;
 	top: 50%;
-	width: 400px;	
-	height: 120px;
+	min-width: 400px;	
+	min-height: 120px;
 	margin-top: -200px;
 	margin-left: -200px;
 	background: -webkit-gradient(linear, left top, right top, from(#dddddd),color-stop(0.25, #cccccc), color-stop(0.5, #dddddd), color-stop(0.75, #cccccc), to(#dddddd));
@@ -152,6 +152,10 @@ a.xpathor-boxclose{
 	visibility: hidden;
 	transition: opacity 1s, visibility 1s;
 	box-shadow: 5px 5px 2px #aaaaaa;
+	font-size: 1em;
+	font-family: 'simsun';
+	color: black;
+	line-height: 20px;
 }
 .xpathor-dialog.dialog-show {
 	visibility: visible;
@@ -195,4 +199,30 @@ a.xpathor-boxclose{
 .xpathor-dialog-button.confirm {
 	float: right;
 	margin-right: 40px;
+}
+
+.xpathor-preview-news-list {
+	padding-bottom: 20px;
+	padding-right: 10px;
+	font-size: 1.3em;
+	overflow-y: scroll;
+	color: black;
+}
+
+.xpathor-preview-news-list-title {
+	width: 70%;
+	overflow-x: hidden;
+}
+
+.xpathor-preview-news-list-category {
+	width: 20%;
+}
+
+.xpathor-preview-news-list-priority {
+	width: 10%;
+}
+
+.xpathor-preview-news-list-table {
+	margin: 20px auto;
+	width: 90%;
 }

@@ -12,6 +12,22 @@ var PortalProcessor = Processor.extend({
 	_preview_elem: null,
 	_dialog_elem: null,
 
+	_category_map: {
+		1: "Important News",
+		2: "International",
+		3: "National",
+		4: "Society",
+		5: "Entertainment",
+		6: "Sport",
+		7: "Finance",
+		8: "Technology",
+	},
+	_priority_map: {
+		8: "P0",
+		0: "P1",
+		4: "P2",
+	},
+
 	_step_map: {
 		start: "block",
 		block: "news",
@@ -230,6 +246,118 @@ var PortalProcessor = Processor.extend({
 		}
 		template += '    ],\n';
 		console.log(template);
+		// preview result
+		this._preview_by_templates(message);
+	},
+
+	// extract result by portal template blocks
+	_extract: function(blocks){
+		var results = [];
+		var template, result, elements, block, headlines, news, urls, item;
+		for (var i=0; i < blocks.length; i++){
+			template = blocks[i];
+			result = [];
+			elements = XpathEvaluator.evaluate(document, template.block);
+			if (elements == null || elements.length < template.index){
+				console.log("[Portal] Error when extract by template: block index out of range");
+				continue;
+			}
+			block = elements[template.index];
+			headlines = XpathEvaluator.evaluate(block, template.headline);
+			headlines = headlines == null ? [] : headlines;
+			news = XpathEvaluator.evaluate(block, template.news);
+			news = news == null ? [] : news;
+			urls = [];
+			for (var j=0; j < headlines.length; j++){
+				item = {};
+				item.url = $(headlines[j]).attr("href").trim();
+				if (urls.indexOf(item.url) != -1){
+					continue;
+				}
+				item.title = $(headlines[j]).text().trim();
+				item.category = template.category;
+				item.status = template.headline_priority;
+				console.log(item.url);
+				console.log(item.title);
+				result.push(item);
+				urls.push(item.url);
+			}
+			for (var j=0; j < news.length; j++){
+				item = {};
+				item.url = $(news[j]).attr("href").trim();
+				if (urls.indexOf(item.url) != -1){
+					continue;
+				}
+				item.title = $(news[j]).text().trim();
+				item.category = template.category;
+				item.status = template.normal_priority;
+				console.log(item.url);
+				console.log(item.title);
+				result.push(item);
+				urls.push(item.url);
+			}
+			results.push(result);
+		}
+		return results;
+	},
+
+	preview: function(){
+		// get template from local storage
+		XpathorStorage.load_temp_template(document.location.host, "news", this._preview_by_templates, this);
+	},
+
+	// preview extracting result
+	_preview: function(results){
+		// generating html code by result
+		var html = "";
+		console.log(results.length);
+		for (var i=0; i < results.length; i++){
+			if (results[i].length == 0){
+				continue;
+			}
+			html += "<table border='1' cellspacing='0' cellpadding='5' class='xpathor-preview-news-list-table'><tr>" +
+					"<th>News</th><th>Category</th><th>Priority</th></tr>";
+			for (var j=0; j < results[i].length; j++){
+				html += "<tr><td class='xpathor-preview-news-list-title'><a href='" + results[i][j].url + "' target='_blank'>" + results[i][j].title + "</td>" + 
+						"<td align='center' class='xpathor-preview-news-list-category'>" + this._category_map[results[i][j].category] + 
+						"</td><td align='center' class='xpahtor-preview-news-list-priority'>" + 
+						this._priority_map[results[i][j].status] + "</td></tr>";
+			}
+			html += "</table>";
+		}
+		$("#xpathor-preview-news-list").html(html);
+		// show preview block
+		$("#xpathor-preview").toggleClass("preview-show");
+	},
+
+	_preview_by_templates: function(result){
+		var blocks = result.blocks;
+		// create preview element and show result.
+		if (this._preview_elem == null && $("#xpathor-preview").length === 0){
+			var width = $(window).width();
+			var height = $(window).height();
+			var left = 0.3 * width / 2;
+			$("body").append("<div class='xpathor-preview' id='xpathor-preview'><a class=\"xpathor-boxclose\" id=\"xpathor-boxclose\"></a>" + 
+				"<div class='xpathor-preview-news-list' id='xpathor-preview-news-list'></div></div>");
+			this._preview_elem = $("#xpathor-preview");
+			this._preview_elem.css("left", left);
+			$("#xpathor-preview-news-list").css("max-height", height - 195);
+			$("#xpathor-preview-news-list").bind('mousewheel DOMMouseScroll', function(e){
+				var e0 = e.originalEvent, delta = e0.wheelDelta || -e0.detail;
+			    this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+			    e.preventDefault();
+			});
+			$("#xpathor-boxclose").click(function(event){
+				$("#xpathor-preview").toggleClass("preview-show");
+			});
+		} else if (this._preview_elem == null){
+			this._preview_elem = $("#xpathor-preview");
+		}
+		// extract result by blocks
+		var extract_result = this._extract(blocks);
+		// generate html by result
+		this._preview(extract_result);
+		// show preview element
 	},
 
     start_select: function(message, callback){
