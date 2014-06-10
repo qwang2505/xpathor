@@ -362,7 +362,11 @@ var BlockXpathGenerator = XpathGenerator.extend({
                 if (parent_tags.indexOf(parent.tagName) == -1){
                     return this._get_news_xpath_by_parent(parent, block, "a", headline); 
                 } else {
-                    return parent.tagName.toLowerCase() + "/" + "a";
+                    if (parent.parentNode == block){
+                        return parent.tagName.toLowerCase() + "/" + "a";
+                    } else {
+                        return ".//" + parent.tagName.toLowerCase() + "/" + "a";
+                    }
                 }
             }
         }
@@ -394,7 +398,11 @@ var BlockXpathGenerator = XpathGenerator.extend({
             return ".//" + new_xpath;
         }
         if (parent_tags.indexOf(parent.tagName) != -1){
-            return parent.tagName.toLowerCase() + "/" + new_xpath;
+            if (parent.parentNode == block){
+                return parent.tagName.toLowerCase() + "/" + new_xpath;
+            } else {
+                return ".//" + parent.tagName.toLowerCase() + "/" + new_xpath;
+            }
         }
         return this._get_news_xpath_by_parent(parent, block, new_xpath, headline);
     },

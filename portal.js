@@ -29,7 +29,8 @@ var PortalProcessor = Processor.extend({
 						'<option value="2">International</option><option value="3">National</option>' + 
 						'<option value="4">Society</option><option value="5">Entertainment</option>' +
 						'<option value="6">Sport</option><option value="7">Finance</option>' +
-						'<option value="8">Technology</option></select>',
+						'<option value="8">Technology</option><option value="9">Military</option><option value="11">History</option>' +
+						'<option value="10">Auto</option><option value="20">Fashion</option></select>',
 	_priority_selection: '<select class="dialog-select"><option value="-1" selected>------</option><option value="8">P0</option>' +
 						 '<option value="0">P1</option><option value="4">P2</option></select>',
 
@@ -204,6 +205,12 @@ var PortalProcessor = Processor.extend({
 		// alert template
 		var template = '    "' + document.location.href + '": [\n';
 		for (var i=0; i < message.blocks.length; i++){
+			if (message.blocks[i].news == "NOT_SET"){
+				message.blocks[i].news = "";
+			}
+			if (message.blocks[i].headline == "NOT_SET"){
+				message.blocks[i].headline = "";
+			}
 			template += '        {\n';
 			template += '            "block": \'' + message.blocks[i].block + '\',\n';
 			template += '            "index": '+ message.blocks[i].index + ',\n';
