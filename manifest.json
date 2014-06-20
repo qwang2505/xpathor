@@ -24,9 +24,9 @@
         "matches": []
     },
     "background": {
-        "scripts": ["background.js"],
+        "page":"background.html",
         "persistent": false
     },
-    "permissions": ["storage"],
+    "permissions": ["storage", "clipboardRead", "clipboardWrite"],
     "web_accessible_resources": ["preview_background.png"]
 }

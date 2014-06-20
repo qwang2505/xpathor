@@ -246,6 +246,8 @@ var PortalProcessor = Processor.extend({
 		}
 		template += '    ],\n';
 		console.log(template);
+		chrome.extension.sendMessage({ text: template });
+		console.log("copy finish");
 		// preview result
 		this._preview_by_templates(message);
 	},
