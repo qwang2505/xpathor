@@ -2,6 +2,8 @@
 // global processors to reuse
 var _processors = {};
 
+$("body").append("<div class='xpathor-selection-2'></div>")
+
 // on status changed listener
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse){

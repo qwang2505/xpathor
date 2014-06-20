@@ -36,6 +36,18 @@
 	outline: 2px dashed blue;
 	outline-offset: 1px;
 	z-index: 99999999;
+	background-color: yellow;
+}
+
+.xpathor-selection-2 {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 0px;
+	height: 0px;
+	background-color: yellow;
+	z-index: 99999999;
+	opacity: 0.5;
 }
 
 .xpathor-preview {

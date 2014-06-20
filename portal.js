@@ -82,45 +82,6 @@ var PortalProcessor = Processor.extend({
 		$("#xpathor_tips").hide();
 	},
 
-	// start to extracting and generating xpath
-	start: function(){
-		this.pre_process();
-		var message = {
-			type: "portal",
-			item: "start",
-			obj: this,
-			data: {},
-			blocks: [],
-		};
-		this.next(message);
-	},
-
-	// next step to process message
-	next: function(message){
-		var item = message.item;
-		if (item == undefined){
-			console.log("[Portal] error: item is undefined while go to next step");
-			return;
-		} else if (this._step_map[item] != undefined){
-			var next_item = this._step_map[item];
-			message.item = next_item;
-			this.show_tip(next_item);
-			//this.stop_select();
-			if (next_item == "block"){
-				this.start_select(message, this.next);
-				this.move_tip();
-			}
-		} else if (item == "headline"){
-			// TODO select category, status, headline status
-			this.stop_select();
-			this.hide_tip();
-			this.post_process(message);
-		} else {
-			console.log("[Portal] unknow item: " + item);
-			return;
-		}
-	},
-
 	// pre process, like run algorithm to get xpath, etc.
 	pre_process: function(){
 		return;
@@ -265,10 +226,16 @@ var PortalProcessor = Processor.extend({
 				continue;
 			}
 			block = elements[template.index];
-			headlines = XpathEvaluator.evaluate(block, template.headline);
-			headlines = headlines == null ? [] : headlines;
-			news = XpathEvaluator.evaluate(block, template.news);
-			news = news == null ? [] : news;
+			headlines = [];
+			if (template.headline.length > 0){
+				headlines = XpathEvaluator.evaluate(block, template.headline);
+				headlines = headlines == null ? [] : headlines;
+			}
+			news = [];
+			if (template.news.length > 0){
+				news = XpathEvaluator.evaluate(block, template.news);
+				news = news == null ? [] : news;
+			}
 			urls = [];
 			for (var j=0; j < headlines.length; j++){
 				item = {};
@@ -356,11 +323,123 @@ var PortalProcessor = Processor.extend({
 			this._preview_elem = $("#xpathor-preview");
 		}
 		// extract result by blocks
+		console.log("extract by template");
 		var extract_result = this._extract(blocks);
+		console.log("extract by template finished");
 		// generate html by result
 		this._preview(extract_result);
 		// show preview element
 	},
+
+	// start to extracting and generating xpath
+	start: function(){
+		this.pre_process();
+		var message = {
+			type: "portal",
+			item: "start",
+			obj: this,
+			data: {},
+			blocks: [],
+		};
+		this.next(message);
+	},
+
+	// next step to process message
+	next: function(message){
+		var item = message.item;
+		if (item == undefined){
+			console.log("[Portal] error: item is undefined while go to next step");
+			return;
+		} else if (this._step_map[item] != undefined){
+			var next_item = this._step_map[item];
+			message.item = next_item;
+			this.show_tip(next_item);
+			//this.stop_select();
+			if (next_item == "block"){
+				message.block_paths = new Array();
+				this.select_block(this, message, this.next);
+				this.move_tip();
+			} else if (next_item == "news"){
+				this.start_select(message, this.next);
+			}
+			// TODO fix here to select news and headline
+		} else if (item == "headline"){
+			// TODO select category, status, headline status
+			this.stop_select();
+			this.hide_tip();
+			this.post_process(message);
+		} else {
+			console.log("[Portal] unknow item: " + item);
+			return;
+		}
+	},
+
+	select_block: function(obj, message, callback){
+        $(window).mouseenter(function(event){
+            $(event.target).addClass("xpathor-selection");
+            //var p = $(event.target).offset()
+            //$(".xpathor-selection-2").css({left: p.left, top: p.top, width: $(event.target).width(), height: $(event.target).height()});
+        });
+        $(window).mouseleave(function(event){
+            $(event.target).removeClass("xpathor-selection");
+            //$(".xpathor-selection-2").css({left: 0, right: 0, width: 0, height: 0});
+        });
+        $(window).click(function(event){
+        	obj.stop_select();
+        	$(window).keyup(function(event){
+        		var code = event.which;
+        		if (code == 38){
+        			// press up
+        			var elem =  $(".xpathor-selection")[0];
+        			var parent = elem.parentNode;
+        			if (parent.tagName == "BODY"){
+        				return false;
+        			}
+        			console.log(elem);
+        			message.block_paths.push(elem);
+        			console.log(message.block_paths.length);
+        			$(elem).removeClass("xpathor-selection");
+        			$(parent).addClass("xpathor-selection");
+        			var p = $(parent).offset()
+            		$(".xpathor-selection-2").css({left: p.left, top: p.top, width: $(parent).width(), height: $(parent).height()});
+        			return false;
+        		} else if (code == 40){
+        			// press down
+        			if (message.block_paths.length == 0){
+        				return false;
+        			}
+        			var child = message.block_paths.pop();
+        			console.log(child);
+        			console.log(message.block_paths.length);
+        			var elem =  $(".xpathor-selection")[0];
+        			$(elem).removeClass("xpathor-selection");
+        			$(child).addClass("xpathor-selection");
+        			var p = $(child).offset()
+            		$(".xpathor-selection-2").css({left: p.left, top: p.top, width: $(child).width(), height: $(child).height()});
+        			return false;
+        		} else if (code == 13){
+        			$(window).unbind("keyup");
+        			// press enter
+        			var elem =  $(".xpathor-selection")[0];
+        			var xpathor = new BlockXpathGenerator();
+        			xpath = xpathor.get_fixed_xpath(elem);
+	                message.block = xpathor.normalize_element(elem);
+	                // stop select and switch
+	                $(elem).removeClass("xpathor-selection");
+            		$(".xpathor-selection-2").css({left: 0, top: 0, width: 0, height: 0});
+	                // get to next step
+	                var item_name = message.item;
+            		var obj = message.obj;
+            		message.data[item_name] = xpath;
+            		message.block_paths = new Array();
+            		callback.call(obj, message);
+        			return false;
+        		}
+        		return true;
+        	});
+            return false;
+        });
+    },
 
     start_select: function(message, callback){
         $(window).mouseenter(function(event){
@@ -375,10 +454,7 @@ var PortalProcessor = Processor.extend({
                 // get xpath
                 var xpathor = new BlockXpathGenerator();
                 var xpath;
-                if (message.item == "block"){
-	                xpath = xpathor.get_fixed_xpath(event.target);
-	                message.block = xpathor.normalize_element(event.target);
-	            } else if (message.item == "news"){
+                if (message.item == "news"){
 	            	var block = message.block;
 	                xpath = xpathor.get_news_xpath(event.target, block, false);	
 	                message.news = event.target;
@@ -405,6 +481,12 @@ var PortalProcessor = Processor.extend({
             message.data[item_name] = NOT_SET;
             callback.call(obj, message);
             return false;
+        });
+        // test keyup event listener
+        $(window).keyup(function(event){
+        	var code = event.which;
+        	console.log("press key: " + code);
+        	// up: 38, down: 40
         });
     },
 });
