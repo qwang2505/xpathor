@@ -246,6 +246,7 @@ var PortalProcessor = Processor.extend({
 				item.title = $(headlines[j]).text().trim();
 				item.category = template.category;
 				item.status = template.headline_priority;
+				item.elem = headlines[j];
 				console.log(item.url);
 				console.log(item.title);
 				result.push(item);
@@ -260,12 +261,13 @@ var PortalProcessor = Processor.extend({
 				item.title = $(news[j]).text().trim();
 				item.category = template.category;
 				item.status = template.normal_priority;
+				item.elem = news[j];
 				console.log(item.url);
 				console.log(item.title);
 				result.push(item);
 				urls.push(item.url);
 			}
-			results.push(result);
+			results.push({block: block, category: template.category, newslist: result});
 		}
 		return results;
 	},
@@ -275,60 +277,53 @@ var PortalProcessor = Processor.extend({
 		XpathorStorage.load_temp_template(document.location.host, "news", this._preview_by_templates, this);
 	},
 
-	// preview extracting result
+	_preview_by_templates: function(result){
+		var blocks = result.blocks;
+		// create preview element and show result.
+		if (this._preview_elem == null && $("#xpathor-preview").length === 0){
+			// create preview element
+			// TODO need a close button?
+			$("body").append("<div class='xpathor-preview' id='xpathor-preview'>" + 
+				"<div class='xpathor-preview-news-list' id='xpathor-preview-news-list'></div></div>");
+			this._preview_elem = $("#xpathor-preview");
+		} else if (this._preview_elem == null){
+			this._preview_elem = $("#xpathor-preview");
+		}
+		// extract result by blocks
+		var extract_result = this._extract(blocks);
+		// generate html by result
+		this._preview(extract_result);
+		// show preview element
+	},
+
+		// preview extracting result
 	_preview: function(results){
 		// generating html code by result
 		var html = "";
 		console.log(results.length);
 		for (var i=0; i < results.length; i++){
-			if (results[i].length == 0){
+			if (results[i].newslist.length == 0){
 				continue;
 			}
 			html += "<table border='1' cellspacing='0' cellpadding='5' class='xpathor-preview-news-list-table'><tr>" +
 					"<th>News</th><th>Category</th><th>Priority</th></tr>";
-			for (var j=0; j < results[i].length; j++){
-				html += "<tr><td class='xpathor-preview-news-list-title'><a href='" + results[i][j].url + "' target='_blank'>" + results[i][j].title + "</td>" + 
-						"<td align='center' class='xpathor-preview-news-list-category'>" + this._category_map[results[i][j].category] + 
+			for (var j=0; j < results[i].newslist.length; j++){
+				html += "<tr><td class='xpathor-preview-news-list-title'><a href='" + results[i].newslist[j].url + "' target='_blank'>" + results[i].newslist[j].title + "</td>" + 
+						"<td align='center' class='xpathor-preview-news-list-category'>" + this._category_map[results[i].newslist[j].category] + 
 						"</td><td align='center' class='xpahtor-preview-news-list-priority'>" + 
-						this._priority_map[results[i][j].status] + "</td></tr>";
+						this._priority_map[results[i].newslist[j].status] + "</td></tr>";
+				$(results[i].newslist[j].elem).attr("xpathor_priority", this._priority_map[results[i].newslist[j].status]);
+				$(results[i].newslist[j].elem).addClass("xpathor-preview-news");
 			}
 			html += "</table>";
+			var block = results[i].block;
+			$(block).attr("xpathor_category", this._category_map[results[i].category]);
+			$(block).addClass("xpathor-preview-block");
 		}
 		$("#xpathor-preview-news-list").html(html);
+		// TODO change position
 		// show preview block
-		$("#xpathor-preview").toggleClass("preview-show");
-	},
-
-	_preview_by_templates: function(result){
-		var blocks = result.blocks;
-		// create preview element and show result.
-		if (this._preview_elem == null && $("#xpathor-preview").length === 0){
-			var width = $(window).width();
-			var height = $(window).height();
-			var left = 0.3 * width / 2;
-			$("body").append("<div class='xpathor-preview' id='xpathor-preview'><a class=\"xpathor-boxclose\" id=\"xpathor-boxclose\"></a>" + 
-				"<div class='xpathor-preview-news-list' id='xpathor-preview-news-list'></div></div>");
-			this._preview_elem = $("#xpathor-preview");
-			this._preview_elem.css("left", left);
-			$("#xpathor-preview-news-list").css("max-height", height - 195);
-			$("#xpathor-preview-news-list").bind('mousewheel DOMMouseScroll', function(e){
-				var e0 = e.originalEvent, delta = e0.wheelDelta || -e0.detail;
-			    this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
-			    e.preventDefault();
-			});
-			$("#xpathor-boxclose").click(function(event){
-				$("#xpathor-preview").toggleClass("preview-show");
-			});
-		} else if (this._preview_elem == null){
-			this._preview_elem = $("#xpathor-preview");
-		}
-		// extract result by blocks
-		console.log("extract by template");
-		var extract_result = this._extract(blocks);
-		console.log("extract by template finished");
-		// generate html by result
-		this._preview(extract_result);
-		// show preview element
+		//$("#xpathor-preview").toggleClass("preview-show");
 	},
 
 	// start to extracting and generating xpath
@@ -481,12 +476,6 @@ var PortalProcessor = Processor.extend({
             message.data[item_name] = NOT_SET;
             callback.call(obj, message);
             return false;
-        });
-        // test keyup event listener
-        $(window).keyup(function(event){
-        	var code = event.which;
-        	console.log("press key: " + code);
-        	// up: 38, down: 40
         });
     },
 });

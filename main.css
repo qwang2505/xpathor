@@ -9,7 +9,7 @@
 	position: fixed;
 	left: 0px;
 	top: 0px;
-	z-index: 99999999;
+	z-index: 999999999;
 	padding-top: 20px;
 	padding-bottom: 20px;
 	border-radius: 5px;
@@ -26,7 +26,7 @@
 	position: fixed;
 	left: 0px;
 	bottom: 0px;
-	z-index: 99999999;
+	z-index: 999999999;
 	padding-top: 20px;
 	padding-bottom: 20px;
 	border-radius: 5px;
@@ -68,6 +68,56 @@
 	opacity: 0;
 	transition: opacity 1s, visibility 1s;
 	box-shadow: 5px 5px 2px #888888;
+}
+
+.xpathor-preview-block {
+	outline: 2px dashed green !important;
+	outline-offset: 1px !important;
+	z-index: 99999999 !important;
+	background-color: #33cc33 !important;
+	position: relative !important;
+}
+
+.xpathor-preview-block:after {
+	content: attr(xpathor_category) !important;
+	position: absolute !important;
+	right: 2px !important;
+	top: 10px !important;
+	color: green;
+	font-size: 200%;
+	font-weight: bold;
+	font-family: Tahoma;
+	background-color: white;
+	padding: 3px;
+	border: 1px solid green;
+	z-index: 999999999;
+}
+
+.xpathor-preview-block:hover:after {
+	content: "" !important;
+	position: absolute;
+	padding: 0px;
+	border: none;
+}
+
+.xpathor-preview-news {
+	position: relative;
+}
+
+.xpathor-preview-news:hover:after {
+	content: attr(xpathor_priority);
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	color: green;
+	font-family: Tahoma;
+	padding-left: 3px;
+	padding-right: 3px;
+	padding-top: 0px;
+	background-color: white;
+	line-height: 18px;
+	border: 1px solid green;
+	z-index: 9999999999;
 }
 
 .xpathor-preview.preview-show {
@@ -155,7 +205,7 @@ a.xpathor-boxclose{
 	margin-top: -200px;
 	margin-left: -200px;
 	background: -webkit-gradient(linear, left top, right top, from(#dddddd),color-stop(0.25, #cccccc), color-stop(0.5, #dddddd), color-stop(0.75, #cccccc), to(#dddddd));
-	z-index: 9999999;
+	z-index: 999999999;
 	border-radius: 10px;
 	padding: 20px;
 	padding-left: 30px;
