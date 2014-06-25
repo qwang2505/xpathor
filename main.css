@@ -82,7 +82,7 @@
 	content: attr(xpathor_category) !important;
 	position: absolute !important;
 	right: 2px !important;
-	top: 10px !important;
+	top: 20px !important;
 	color: black;
 	font-size: 200%;
 	font-weight: bold;
@@ -342,4 +342,22 @@ a.xpathor-boxclose{
 .xpathor-preview-news-list-table {
 	margin: 20px auto;
 	width: 90%;
+}
+
+.xpathor-preview-block-buttons {
+	position: absolute;
+	top: 20px;
+	left: 2px;
+	padding: 5px;
+	background-color: white;
+	font-family: Tahoma;
+	font-weight: bold;
+	font-size: 150%;
+	visibility: hidden;
+	box-shadow: 1px 1px 1px #888888;
+}
+
+.xpathor-preview-block-buttons span {
+	padding: 5px;
+	cursor: pointer;
 }

@@ -331,23 +331,15 @@ var PortalProcessor = Processor.extend({
 	// preview extracting result
 	_preview_block: function(results, block_template){
 		// generating html code by result
-		var html = "";
 		var block;
 		for (var i=0; i < results.length; i++){
 			if (results[i].newslist.length == 0){
 				continue;
 			}
-			html += "<table border='1' cellspacing='0' cellpadding='5' class='xpathor-preview-news-list-table'><tr>" +
-					"<th>News</th><th>Category</th><th>Priority</th></tr>";
 			for (var j=0; j < results[i].newslist.length; j++){
-				html += "<tr><td class='xpathor-preview-news-list-title'><a href='" + results[i].newslist[j].url + "' target='_blank'>" + results[i].newslist[j].title + "</td>" + 
-						"<td align='center' class='xpathor-preview-news-list-category'>" + this._category_map[results[i].newslist[j].category] + 
-						"</td><td align='center' class='xpahtor-preview-news-list-priority'>" + 
-						this._priority_map[results[i].newslist[j].status] + "</td></tr>";
 				$(results[i].newslist[j].elem).parent().attr("xpathor_priority", this._priority_map[results[i].newslist[j].status]);
 				$(results[i].newslist[j].elem).parent().addClass("xpathor-preview-block-news");
 			}
-			html += "</table>";
 			block = results[i].block;
 			$(block).attr("xpathor_category", this._category_map[results[i].category]);
 			$(block).attr("xpathor_priority", this._priority_map[block_template.priority]);
@@ -357,39 +349,34 @@ var PortalProcessor = Processor.extend({
            	// scroll to element
            	$(window).scrollTop($(block).position().top);
 		}
-		$("#xpathor-preview-news-list").html(html);
-		// TODO change position
-		// show preview block
-		//$("#xpathor-preview").toggleClass("preview-show");
 	},
 
 	// preview extracting result
 	_preview: function(results){
 		// generating html code by result
-		var html = "";
 		for (var i=0; i < results.length; i++){
 			if (results[i].newslist.length == 0){
 				continue;
 			}
-			html += "<table border='1' cellspacing='0' cellpadding='5' class='xpathor-preview-news-list-table'><tr>" +
-					"<th>News</th><th>Category</th><th>Priority</th></tr>";
 			for (var j=0; j < results[i].newslist.length; j++){
-				html += "<tr><td class='xpathor-preview-news-list-title'><a href='" + results[i].newslist[j].url + "' target='_blank'>" + results[i].newslist[j].title + "</td>" + 
-						"<td align='center' class='xpathor-preview-news-list-category'>" + this._category_map[results[i].newslist[j].category] + 
-						"</td><td align='center' class='xpahtor-preview-news-list-priority'>" + 
-						this._priority_map[results[i].newslist[j].status] + "</td></tr>";
 				$(results[i].newslist[j].elem).attr("xpathor_priority", this._priority_map[results[i].newslist[j].status]);
 				$(results[i].newslist[j].elem).addClass("xpathor-preview-news");
 			}
-			html += "</table>";
 			var block = results[i].block;
 			$(block).attr("xpathor_category", this._category_map[results[i].category]);
 			$(block).addClass("xpathor-preview-block");
+			// TODO add buttons
+			$(block).append("<div class='xpathor-preview-block-buttons'><span class='xpathor-preview-block-delete'>DELETE</span></div>");
+			$(block).mouseenter(function(event){
+				$(".xpathor-preview-block-buttons", $(block)).css({visibility: "visible"});
+			});
+			$(block).mouseleave(function(event){
+				$(".xpathor-preview-block-buttons", $(block)).css({visibility: "hidden"});
+			});
+			$(".xpathor-preview-block-hide", $(block)).click(function(event){
+				$(block).removeClass("xpathor-preview-block");
+			});
 		}
-		$("#xpathor-preview-news-list").html(html);
-		// TODO change position
-		// show preview block
-		//$("#xpathor-preview").toggleClass("preview-show");
 	},
 
 	// start to extracting and generating xpath
