@@ -277,6 +277,37 @@ var PortalProcessor = Processor.extend({
 		XpathorStorage.load_temp_template(document.location.host, "news", this._preview_by_templates, this);
 	},
 
+	preview_block: function(template, block_id){
+		var blocks = template.blocks;
+		var block = null;
+		for (var i=0; i < blocks.length; i++){
+			if (blocks[i].id == block_id.substr(0, block_id.length - 1)){
+				block = blocks[i];
+				break;
+			}
+		}
+		if (block == null){
+			console.log("Error: can not find block by id: " + block_id);
+			return;
+		}
+		block.normal_priority = block.status;
+		block.headline_priority = block.headline_status;
+		var ext = block_id[block_id.length-1];
+		if (ext == "1"){
+			block.news = "";
+			block.priority = block.headline_status;
+		} else if (ext == "2"){
+			block.headline = "";
+			block.priority = block.status;
+		} else {
+			console.log("Error: invlaid block id: " + block_id);
+			return;
+		}
+		var extract_result = this._extract([block]);
+		console.log(extract_result);
+		this._preview_block(extract_result, block);
+	},
+
 	_preview_by_templates: function(result){
 		var blocks = result.blocks;
 		// create preview element and show result.
@@ -296,11 +327,45 @@ var PortalProcessor = Processor.extend({
 		// show preview element
 	},
 
-		// preview extracting result
+	// preview extracting result
+	_preview_block: function(results, block_template){
+		// generating html code by result
+		var html = "";
+		var block;
+		for (var i=0; i < results.length; i++){
+			if (results[i].newslist.length == 0){
+				continue;
+			}
+			html += "<table border='1' cellspacing='0' cellpadding='5' class='xpathor-preview-news-list-table'><tr>" +
+					"<th>News</th><th>Category</th><th>Priority</th></tr>";
+			for (var j=0; j < results[i].newslist.length; j++){
+				html += "<tr><td class='xpathor-preview-news-list-title'><a href='" + results[i].newslist[j].url + "' target='_blank'>" + results[i].newslist[j].title + "</td>" + 
+						"<td align='center' class='xpathor-preview-news-list-category'>" + this._category_map[results[i].newslist[j].category] + 
+						"</td><td align='center' class='xpahtor-preview-news-list-priority'>" + 
+						this._priority_map[results[i].newslist[j].status] + "</td></tr>";
+				$(results[i].newslist[j].elem).parent().attr("xpathor_priority", this._priority_map[results[i].newslist[j].status]);
+				$(results[i].newslist[j].elem).parent().addClass("xpathor-preview-block-news");
+			}
+			html += "</table>";
+			block = results[i].block;
+			$(block).attr("xpathor_category", this._category_map[results[i].category]);
+			$(block).attr("xpathor_priority", this._priority_map[block_template.priority]);
+			$(block).addClass("xpathor-preview-block-block");
+			var p = $(block).offset()
+           	$(".xpathor-preview-block-div").css({left: p.left, top: p.top, width: $(block).width(), height: $(block).height()});
+           	// scroll to element
+           	$(window).scrollTop($(block).position().top);
+		}
+		$("#xpathor-preview-news-list").html(html);
+		// TODO change position
+		// show preview block
+		//$("#xpathor-preview").toggleClass("preview-show");
+	},
+
+	// preview extracting result
 	_preview: function(results){
 		// generating html code by result
 		var html = "";
-		console.log(results.length);
 		for (var i=0; i < results.length; i++){
 			if (results[i].newslist.length == 0){
 				continue;

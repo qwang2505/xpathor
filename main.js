@@ -3,6 +3,7 @@
 var _processors = {};
 
 $("body").append("<div class='xpathor-selection-2'></div>")
+$("body").append("<div class='xpathor-preview-block-div'></div>")
 
 // on status changed listener
 chrome.runtime.onMessage.addListener(
@@ -35,6 +36,17 @@ chrome.runtime.onMessage.addListener(
             }
             processor.start();
 			console.log("Extract links from portal in main.js");
+        } else if (request.name == "preview_block" && request.message.url == document.location.href){
+            if ("portal_processor" in _processors){
+                processor = _processors["portal_processor"];
+            } else {
+                processor = new PortalProcessor();
+                _processors["portal_processor"] = processor;
+            }
+            var template = request.message.template;
+            var block_id = request.message.blockID;
+            processor.preview_block(template, block_id);
+            console.log("preview block from portal in main.js");
         } else {
             console.log("Unknow request: " + request.name);
         } 

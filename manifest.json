@@ -18,15 +18,15 @@
         "js": ["jquery.js", "jquery.xpath.min.js", "uuid.js", "storage.js", "md5.js", "class.js", "xpath.js", "definations.js", "processor.js", "news.js", "portal.js", "roll.js", "main.js"],
         "css": ["main.css"],
         "run_at": "document_end",
-        "all_frames": false
+        "all_frames": true
     }],
     "externally_connectable": {
-        "matches": []
+        "matches": ["http://10.2.10.1/*"]
     },
     "background": {
-        "page":"background.html",
+        "scripts": ["jquery.js", "background.js"],
         "persistent": false
     },
-    "permissions": ["storage", "clipboardRead", "clipboardWrite"],
-    "web_accessible_resources": ["preview_background.png"]
+    "permissions": ["storage", "clipboardRead", "clipboardWrite", "tabs"],
+    "web_accessible_resources": ["preview_background.png", "jquery.js"]
 }
