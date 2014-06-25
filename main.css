@@ -83,13 +83,12 @@
 	position: absolute !important;
 	right: 2px !important;
 	top: 10px !important;
-	color: green;
+	color: black;
 	font-size: 200%;
 	font-weight: bold;
 	font-family: Tahoma;
-	background-color: white;
-	padding: 3px;
-	border: 1px solid green;
+	background-color: gold;
+	padding: 10px;
 	z-index: 999999999;
 }
 
@@ -109,14 +108,13 @@
 	position: absolute;
 	right: 0px;
 	top: 0px;
-	color: green;
+	color: black;
 	font-family: Tahoma;
 	padding-left: 3px;
 	padding-right: 3px;
 	padding-top: 0px;
-	background-color: white;
+	background-color: gold;
 	line-height: 18px;
-	border: 1px solid green;
 	z-index: 9999999999;
 }
 

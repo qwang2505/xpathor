@@ -167,7 +167,8 @@ var PortalProcessor = Processor.extend({
 		// use generated xpath to extract block to get index of news block
 		message.data.index = this._get_block_index(message.data.block, message.block);
 		if (message.data.index == -1){
-			alert("can not find block with block xpath, please contact the developer");
+			alert("can not find block with block xpath, please re-select block");
+			this.restart(message);
 			return;
 		}
 		// save selected data and generated xpath
@@ -404,6 +405,13 @@ var PortalProcessor = Processor.extend({
 		this.next(message);
 	},
 
+	// restart
+	restart: function(message){
+        this.stop_select();
+        this.hide_tip();
+        this._next_block(message);
+	},
+
 	// next step to process message
 	next: function(message){
 		var item = message.item;
@@ -417,7 +425,7 @@ var PortalProcessor = Processor.extend({
 			//this.stop_select();
 			if (next_item == "block"){
 				message.block_paths = new Array();
-				this.select_block(this, message, this.next);
+				this.select_block(this, message, this.next, this.restart);
 				this.move_tip();
 			} else if (next_item == "news"){
 				this.start_select(message, this.next);
@@ -434,7 +442,7 @@ var PortalProcessor = Processor.extend({
 		}
 	},
 
-	select_block: function(obj, message, callback){
+	select_block: function(obj, message, callback, restart_callback){
         $(window).mouseenter(function(event){
             $(event.target).addClass("xpathor-selection");
             //var p = $(event.target).offset()
@@ -443,6 +451,11 @@ var PortalProcessor = Processor.extend({
         $(window).mouseleave(function(event){
             $(event.target).removeClass("xpathor-selection");
             //$(".xpathor-selection-2").css({left: 0, right: 0, width: 0, height: 0});
+        });
+        $(window).bind("contextmenu", function(event){
+            $(event.target).removeClass("xpathor-selection");
+            restart_callback.call(obj, message);
+            return false;
         });
         $(window).click(function(event){
         	obj.stop_select();
@@ -493,6 +506,15 @@ var PortalProcessor = Processor.extend({
             		message.data[item_name] = xpath;
             		message.block_paths = new Array();
             		callback.call(obj, message);
+        			return false;
+        		} else if (code == 27){
+        			$(window).unbind("keyup");
+        			var elem =  $(".xpathor-selection")[0];
+	                // stop select and switch
+	                $(elem).removeClass("xpathor-selection");
+            		$(".xpathor-selection-2").css({left: 0, top: 0, width: 0, height: 0});
+        			// press esc, restart select block
+        			restart_callback.call(message.obj, message);
         			return false;
         		}
         		return true;
