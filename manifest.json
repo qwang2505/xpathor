@@ -24,7 +24,7 @@
         "matches": ["http://10.2.10.1/*"]
     },
     "background": {
-        "scripts": ["jquery.js", "background.js"],
+        "page": "background.html",
         "persistent": false
     },
     "permissions": ["storage", "clipboardRead", "clipboardWrite", "tabs"],
