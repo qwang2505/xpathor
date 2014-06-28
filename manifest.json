@@ -21,7 +21,7 @@
         "all_frames": true
     }],
     "externally_connectable": {
-        "matches": ["http://10.2.10.1/*"]
+        "matches": ["http://10.2.10.1/*", "http://10.2.0.48:3000/*"]
     },
     "background": {
         "page": "background.html",

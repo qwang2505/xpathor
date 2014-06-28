@@ -1,3 +1,4 @@
+var TEMPLATE = null;
 
 function extract_news() {
 	console.log("[Popup] extract news button clicked");
@@ -24,10 +25,10 @@ function login(){
 	window.close();
 }
 
-function preview(){
-    console.log("[Popup] preview");
+function preview_blocks(){
+    console.log("[Popup] preview blocks");
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {name: "preview_news"}, function(response) {
+        chrome.tabs.sendMessage(tabs[0].id, {name: "preview_blocks", template: TEMPLATE}, function(response) {
             console.log("[Popup] Response from preview_news: " + response.success);
         });
     });
@@ -38,5 +39,21 @@ document.addEventListener('DOMContentLoaded', function () {
 	document.getElementById("extract_news_btn").addEventListener('click', extract_news);
 	document.getElementById("extract_link_btn").addEventListener('click', extract_links);
 	document.getElementById("login_btn").addEventListener('click', login); 
-    document.getElementById("preview_result").addEventListener('click', preview); 
+    document.getElementById("preview_blocks_btn").addEventListener('click', preview_blocks); 
+
+    // send message to check if supported sites, to display buttons.
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+        var url = tabs[0].url;
+        $.get("http://10.2.8.221/admin/template/api/get?lc=zh-cn&type=portal&key=" + url, function(data){
+            if (data['data'].length == 0){
+                // new site, show extract links button
+                $("#extract_link_btn").toggleClass("hide");
+                return;
+            }
+            TEMPLATE = data['data'][0];
+            // show preview and append blocks button
+            $("#preview_blocks_btn").toggleClass("hide");
+            $("#add_blocks_btn").toggleClass("hide");
+        });
+    });
 });

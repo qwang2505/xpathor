@@ -46,7 +46,8 @@ var PortalProcessor = Processor.extend({
 						'<option value="4">Society</option><option value="5">Entertainment</option>' +
 						'<option value="6">Sport</option><option value="7">Finance</option>' +
 						'<option value="8">Technology</option><option value="9">Military</option><option value="11">History</option>' +
-						'<option value="10">Auto</option><option value="20">Fashion</option></select>',
+						'<option value="10">Auto</option><option value="13">Life</option><option value="20">Fashion</option>' + 
+						'<option value="18">Politics</option></select>',
 	_priority_selection: '<select class="dialog-select"><option value="-1" selected>------</option><option value="8">P0</option>' +
 						 '<option value="0">P1</option><option value="4">P2</option></select>',
 
@@ -355,6 +356,7 @@ var PortalProcessor = Processor.extend({
 	_preview: function(results){
 		// generating html code by result
 		for (var i=0; i < results.length; i++){
+			// use div to cover preview area, but need to show priority of news in the middel of news.
 			if (results[i].newslist.length == 0){
 				continue;
 			}
