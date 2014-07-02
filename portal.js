@@ -244,7 +244,13 @@ var PortalProcessor = Processor.extend({
 			urls = [];
 			for (var j=0; j < headlines.length; j++){
 				item = {};
-				item.url = $(headlines[j]).attr("href").trim();
+				item.url = $(headlines[j]).attr("href");
+				if (item.url == null || item.url == undefined){
+					console.log("can not get url for headline item: ");
+					console.log(news[j]);
+					continue;
+				}
+				item.url = item.url.trim();
 				if (urls.indexOf(item.url) != -1){
 					continue;
 				}
@@ -259,7 +265,13 @@ var PortalProcessor = Processor.extend({
 			}
 			for (var j=0; j < news.length; j++){
 				item = {};
-				item.url = $(news[j]).attr("href").trim();
+				item.url = $(news[j]).attr("href");
+				if (item.url == null || item.url == undefined){
+					console.log("can not get url for item: ");
+					console.log(news[j]);
+					continue;
+				}
+				item.url = item.url.trim();
 				if (urls.indexOf(item.url) != -1){
 					continue;
 				}
@@ -329,7 +341,7 @@ var PortalProcessor = Processor.extend({
 		var extract_result = this._extract(blocks);
 		console.log(extract_result);
 		// generate html by result
-		this._preview(extract_result);
+		this._preview(extract_result, this);
 		// show preview element
 	},
 
@@ -342,12 +354,12 @@ var PortalProcessor = Processor.extend({
 				continue;
 			}
 			for (var j=0; j < results[i].newslist.length; j++){
-				$(results[i].newslist[j].elem).parent().attr("xpathor_priority", this._priority_map[results[i].newslist[j].status]);
+				$(results[i].newslist[j].elem).parent().attr("xpathor_priority", this._priority_map[results[i].newslist[j].status] || "P2");
 				$(results[i].newslist[j].elem).parent().addClass("xpathor-preview-block-news");
 			}
 			block = results[i].block;
 			$(block).attr("xpathor_category", this._category_map[results[i].category]);
-			$(block).attr("xpathor_priority", this._priority_map[block_template.priority]);
+			$(block).attr("xpathor_priority", this._priority_map[block_template.priority] || "P2");
 			$(block).addClass("xpathor-preview-block-block");
 			var p = $(block).offset()
            	$(".xpathor-preview-block-div").css({left: p.left, top: p.top, width: $(block).width(), height: $(block).height()});
@@ -357,15 +369,15 @@ var PortalProcessor = Processor.extend({
 	},
 
 	// get block preview div. If no available, create one
-	_get_preview_block_div: function(){
+	_get_preview_block_div: function(index){
 		var elems = $("div[class='xpathor-preview-block'][used='false']");
 		if (elems.length > 0){
 			return elems[0];
 		}
-		$("body").append("<div class='xpathor-preview-block' used='false'>" + 
-			"<div class='xpathor-preview-buttons'><span class='xpathor-preview-edit'>Edit</span>" + 
-			"<span class='xpathor-preview-delete'>Delete</span><span class='xpathor-preview-hide'>Hide</span></div>" + 
-			"<div class='xpathor-preview-category'></div></div>");
+		$("body").append("<div class='xpathor-preview-block' used='false' xpathor_preview_index=" + index + ">" + 
+			"<div class='xpathor-preview-buttons'><span class='xpathor-preview-edit' index=" + index + ">Edit</span>" + 
+			"<span class='xpathor-preview-delete' index=" + index + ">Delete</span><span class='xpathor-preview-hide' index=" + index + 
+			">Hide</span></div>" + "<div class='xpathor-preview-category'></div></div>");
 		var elems = $("div[class='xpathor-preview-block'][used='false']");
 		if (elems.length > 0){
 			return elems[0];
@@ -374,7 +386,7 @@ var PortalProcessor = Processor.extend({
 	},
 
 	// preview extracting result
-	_preview: function(results){
+	_preview: function(results, obj){
 		// generating html code by result
 		for (var i=0; i < results.length; i++){
 			// use div to cover preview area, but need to show priority of news in the middel of news.
@@ -382,30 +394,37 @@ var PortalProcessor = Processor.extend({
 				continue;
 			}
 			for (var j=0; j < results[i].newslist.length; j++){
-				$(results[i].newslist[j].elem).attr("xpathor_priority", this._priority_map[results[i].newslist[j].status]);
+				$(results[i].newslist[j].elem).attr("xpathor_priority", this._priority_map[results[i].newslist[j].status] || "P2");
 				$(results[i].newslist[j].elem).addClass("xpathor-preview-news");
 			}
 			var block = results[i].block;
-			var preview_block = this._get_preview_block_div();
+			// TODO need to record template id for later management, like delete, edit, etc.
+			var preview_block = this._get_preview_block_div(i);
 			var p = $(block).offset();
 			var width = $(block).width();
 			var height = $(block).outerHeight();
 			$(preview_block).css({left: p.left, top: p.top - 24, width: width, height: height + 24});
 			$(preview_block).attr("used", "true");
+			// set extra attr on preview block to get later
+			$(block).attr("xpathor_preview_block_index", i);
 			// update cateogry
 			$(".xpathor-preview-category", $(preview_block)).html(this._category_map[results[i].category]);
 			$(".xpathor-preview-hide", $(preview_block)).click(function(){
-				$(preview_block).css({left: 0, top: 0, width: 0, height: 0});
-				$(preview_block).attr("used", "false");
-				$(".xpathor-preview-news", $(block)).each(function(){
+				var index = parseInt($(this).attr("index"));
+				var pre_block = $("div[xpathor_preview_index=\"" + index + "\"]");
+				$(pre_block).css({left: 0, top: 0, width: 0, height: 0});
+				$(pre_block).attr("used", "false");
+				$(".xpathor-preview-news", $("*[xpathor_preview_block_index=\"" + index + "\"]")).each(function(){
 					$(this).removeClass("xpathor-preview-news");
 				});
 			});
 			$(".xpathor-preview-delete", $(preview_block)).click(function(){
 				// TODO send message to delete block
-				$(preview_block).css({left: 0, top: 0, width: 0, height: 0});
-				$(preview_block).attr("used", "false");
-				$(".xpathor-preview-news", $(block)).each(function(){
+				var index = parseInt($(this).attr("index"));
+				var pre_block = $("div[xpathor_preview_index=\"" + index + "\"]");
+				$(pre_block).css({left: 0, top: 0, width: 0, height: 0});
+				$(pre_block).attr("used", "false");
+				$(".xpathor-preview-news", $("*[xpathor_preview_block_index=\"" + index + "\"]")).each(function(){
 					$(this).removeClass("xpathor-preview-news");
 				});
 			});

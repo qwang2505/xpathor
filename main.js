@@ -2,11 +2,11 @@
 // global processors to reuse
 var _processors = {};
 
-$(window).on('beforeunload', function() {
-    if (XpathorStorage.unsave){
-        return "Save templates before exit?";
-    }
-});
+// $(window).on('beforeunload', function() {
+//     if (XpathorStorage.unsave){
+//         return "Save templates before exit?";
+//     }
+// });
 
 $("body").append("<div class='xpathor-selection-2'></div>");
 
@@ -64,10 +64,29 @@ chrome.runtime.onMessage.addListener(
                 processor = new PortalProcessor();
                 _processors["portal_processor"] = processor;
             }
-            var template = request.template;
+            var template = TemplateManager.template;
+            if (template == null || template == undefined){
+                console.log("no template in TemplateManager while preview blocks");
+                return;
+            }
             console.log(template);
             processor._preview_by_templates(template);
             console.log("preview block from portal in main.js");
+        } else if (request.name == "template_exists"){
+            // whether template already exists, called by popup
+            var response = {success: true};
+            response.template = TemplateManager.template;
+            sendResponse(response);
+            return;
+        } else if (request.name == "set_template"){
+            // set template value, called by popup
+            var template = request.template;
+            if (template != null && template != undefined){
+                TemplateManager.type = template.type;
+                TemplateManager.template = template;
+            }
+            sendResponse({success: true});
+            return;
         } else {
             console.log("Unknow request: " + request.name);
         }
