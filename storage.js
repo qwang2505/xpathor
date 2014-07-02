@@ -13,6 +13,8 @@ var XpathorStorage = {
 
 	version: 1,
 
+	unsave: true,
+
 	_default_callback: function(result){
 		console.log("get result: ");
 		console.log(result);
@@ -99,5 +101,28 @@ var XpathorStorage = {
 	load_template: function(key, type, callback){
 		data_key = this._get_template_key(type);
 		tihs._load(data_key, key, callback);
+	},
+
+
+	// save portal template
+	save_portal_template: function(template, callback){
+		var obj = {};
+		obj[window.location.href] = {
+			type: "portal",
+			blocks: template,
+		};
+		console.log(obj);
+		chrome.storage.local.set(obj, callback);
+		this.unsave = true;
+	},
+	// update portal template
+	update_portal_template: function(update_map){
+		// update template by block id, here need to handle situation
+	},
+	// get portal template
+	get_portal_template: function(callback, obj){
+		chrome.storage.local.get(window.location.href, function(result){
+			callback.call(obj, result);
+		});
 	},
 };

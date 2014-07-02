@@ -211,6 +211,9 @@ var PortalProcessor = Processor.extend({
 		console.log(template);
 		chrome.extension.sendMessage({ text: template });
 		console.log("copy finish");
+		// save template to local storage
+		// TODO generate block id
+		XpathorStorage.save_portal_template(message.blocks);
 		// preview result
 		this._preview_by_templates(message);
 	},
@@ -324,12 +327,13 @@ var PortalProcessor = Processor.extend({
 		}
 		// extract result by blocks
 		var extract_result = this._extract(blocks);
+		console.log(extract_result);
 		// generate html by result
 		this._preview(extract_result);
 		// show preview element
 	},
 
-	// preview extracting result
+	// preview extracting result, used by admin to show single block.
 	_preview_block: function(results, block_template){
 		// generating html code by result
 		var block;
@@ -352,6 +356,23 @@ var PortalProcessor = Processor.extend({
 		}
 	},
 
+	// get block preview div. If no available, create one
+	_get_preview_block_div: function(){
+		var elems = $("div[class='xpathor-preview-block'][used='false']");
+		if (elems.length > 0){
+			return elems[0];
+		}
+		$("body").append("<div class='xpathor-preview-block' used='false'>" + 
+			"<div class='xpathor-preview-buttons'><span class='xpathor-preview-edit'>Edit</span>" + 
+			"<span class='xpathor-preview-delete'>Delete</span><span class='xpathor-preview-hide'>Hide</span></div>" + 
+			"<div class='xpathor-preview-category'></div></div>");
+		var elems = $("div[class='xpathor-preview-block'][used='false']");
+		if (elems.length > 0){
+			return elems[0];
+		}
+		console.log("Error: create preview block failed");
+	},
+
 	// preview extracting result
 	_preview: function(results){
 		// generating html code by result
@@ -365,18 +386,31 @@ var PortalProcessor = Processor.extend({
 				$(results[i].newslist[j].elem).addClass("xpathor-preview-news");
 			}
 			var block = results[i].block;
-			$(block).attr("xpathor_category", this._category_map[results[i].category]);
-			$(block).addClass("xpathor-preview-block");
-			// TODO add buttons
-			$(block).append("<div class='xpathor-preview-block-buttons'><span class='xpathor-preview-block-delete'>DELETE</span></div>");
-			$(block).mouseenter(function(event){
-				$(".xpathor-preview-block-buttons", $(block)).css({visibility: "visible"});
+			var preview_block = this._get_preview_block_div();
+			var p = $(block).offset();
+			var width = $(block).width();
+			var height = $(block).outerHeight();
+			$(preview_block).css({left: p.left, top: p.top - 24, width: width, height: height + 24});
+			$(preview_block).attr("used", "true");
+			// update cateogry
+			$(".xpathor-preview-category", $(preview_block)).html(this._category_map[results[i].category]);
+			$(".xpathor-preview-hide", $(preview_block)).click(function(){
+				$(preview_block).css({left: 0, top: 0, width: 0, height: 0});
+				$(preview_block).attr("used", "false");
+				$(".xpathor-preview-news", $(block)).each(function(){
+					$(this).removeClass("xpathor-preview-news");
+				});
 			});
-			$(block).mouseleave(function(event){
-				$(".xpathor-preview-block-buttons", $(block)).css({visibility: "hidden"});
+			$(".xpathor-preview-delete", $(preview_block)).click(function(){
+				// TODO send message to delete block
+				$(preview_block).css({left: 0, top: 0, width: 0, height: 0});
+				$(preview_block).attr("used", "false");
+				$(".xpathor-preview-news", $(block)).each(function(){
+					$(this).removeClass("xpathor-preview-news");
+				});
 			});
-			$(".xpathor-preview-block-hide", $(block)).click(function(event){
-				$(block).removeClass("xpathor-preview-block");
+			$(".xpathor-preview-edit", $(preview_block)).click(function(){
+				// TODO finish this
 			});
 		}
 	},

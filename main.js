@@ -2,11 +2,22 @@
 // global processors to reuse
 var _processors = {};
 
+$(window).on('beforeunload', function() {
+    if (XpathorStorage.unsave){
+        return "Save templates before exit?";
+    }
+});
+
 $("body").append("<div class='xpathor-selection-2'></div>");
 
 // on status changed listener
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse){
+        if (request.url != null && request.url != undefined){
+            if (request.url != window.location.href){
+                return;
+            }
+        }
         var processor;
         if (request.name == "extract_news"){
         	if ("news_processor" in _processors){
@@ -54,6 +65,7 @@ chrome.runtime.onMessage.addListener(
                 _processors["portal_processor"] = processor;
             }
             var template = request.template;
+            console.log(template);
             processor._preview_by_templates(template);
             console.log("preview block from portal in main.js");
         } else {

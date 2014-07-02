@@ -9,7 +9,7 @@
 	position: fixed;
 	left: 0px;
 	top: 0px;
-	z-index: 999999999;
+	z-index: 99999;
 	padding-top: 20px;
 	padding-bottom: 20px;
 	border-radius: 5px;
@@ -26,7 +26,7 @@
 	position: fixed;
 	left: 0px;
 	bottom: 0px;
-	z-index: 999999999;
+	z-index: 99999;
 	padding-top: 20px;
 	padding-bottom: 20px;
 	border-radius: 5px;
@@ -35,7 +35,7 @@
 .xpathor-selection {
 	outline: 2px dashed blue;
 	outline-offset: 1px;
-	z-index: 99999999;
+	z-index: 999999;
 	background-color: yellow;
 }
 
@@ -46,7 +46,7 @@
 	width: 0px;
 	height: 0px;
 	background-color: yellow;
-	z-index: 99999999;
+	z-index: 9999999;
 	opacity: 0.5;
 }
 
@@ -63,7 +63,7 @@
 	font-size: 14px;
 	position: fixed;
 	top: 10px;
-	z-index: 999999999;
+	z-index: 99999999;
 	visibility: hidden;
 	opacity: 0;
 	transition: opacity 1s, visibility 1s;
@@ -71,25 +71,15 @@
 }
 
 .xpathor-preview-block {
-	outline: 2px dashed green !important;
-	outline-offset: 1px !important;
 	z-index: 99999999 !important;
-	background-color: #33cc33 !important;
-	position: relative !important;
-}
-
-.xpathor-preview-block:after {
-	content: attr(xpathor_category) !important;
-	position: absolute !important;
-	right: 2px !important;
-	top: 20px !important;
-	color: black;
-	font-size: 200%;
-	font-weight: bold;
+	background-color: green;
+	position: absolute;
+	top: 0px
+	left: 0px;
+	width: 0px;
+	height: 0px;
+	background: rgba(0, 131, 0, 0.5);
 	font-family: Tahoma;
-	background-color: gold;
-	padding: 10px;
-	z-index: 999999999;
 }
 
 .xpathor-preview-block:hover:after {
@@ -99,14 +89,9 @@
 	border: none;
 }
 
-.xpathor-preview-news {
-	position: relative;
-}
-
-.xpathor-preview-news:hover:after {
+.xpathor-preview-news:before {
 	content: attr(xpathor_priority);
-	position: absolute;
-	right: 0px;
+	left: 30px;
 	top: 0px;
 	color: black;
 	font-family: Tahoma;
@@ -115,7 +100,7 @@
 	padding-top: 0px;
 	background-color: gold;
 	line-height: 18px;
-	z-index: 9999999999;
+	z-index: 99999999;
 }
 
 .xpathor-preview-block-block {
@@ -144,7 +129,7 @@
 	background-color: gold;
 	padding: 3px;
 	border: 1px solid gold;
-	z-index: 999999999;
+	z-index: 99999999;
 }
 
 .xpathor-preview-block-block:hover:after {
@@ -172,7 +157,7 @@
 	background-color: gold;
 	line-height: 18px;
 	border: 1px solid gold;
-	z-index: 9999999999;
+	z-index: 99999999;
 }
 
 .xpathor-preview.preview-show {
@@ -344,20 +329,24 @@ a.xpathor-boxclose{
 	width: 90%;
 }
 
-.xpathor-preview-block-buttons {
-	position: absolute;
-	top: 20px;
-	left: 2px;
-	padding: 5px;
-	background-color: white;
-	font-family: Tahoma;
-	font-weight: bold;
-	font-size: 150%;
-	visibility: hidden;
-	box-shadow: 1px 1px 1px #888888;
+.xpathor-preview-buttons {
+	float: left;
 }
 
-.xpathor-preview-block-buttons span {
-	padding: 5px;
+.xpathor-preview-category {
+	float: right;
+	font-size: 1.6em;
+	background-color: gold;
+	background: rgba(255, 215, 0, 1.0);
+	padding-left: 5px;
+	padding-right: 5px;
+	z-index: 999999999999;
+}
+
+.xpathor-preview-buttons span {
+	padding-left: 5px;
+	padding-right: 5px;
+	font-size: 1.6em;
 	cursor: pointer;
+	background: rgba(230, 230, 230, 1.0);
 }
