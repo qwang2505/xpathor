@@ -284,7 +284,7 @@ var PortalProcessor = Processor.extend({
 				result.push(item);
 				urls.push(item.url);
 			}
-			results.push({block: block, category: template.category, newslist: result});
+			results.push({block: block, category: template.category, blockId: template.id, newslist: result});
 		}
 		return results;
 	},
@@ -369,18 +369,33 @@ var PortalProcessor = Processor.extend({
 	},
 
 	// get block preview div. If no available, create one
-	_get_preview_block_div: function(index){
+	_get_preview_block_div: function(index, block_id){
 		var elems = $("div[class='xpathor-preview-block'][used='false']");
 		if (elems.length > 0){
-			return elems[0];
+			var elem = elems[0];
+			$(elem).attr("xpathor_preview_index", index);
+			$(elem).attr("xpathor_block_id", block_id);
+			$("span", $(elem)).each(function(){
+				$(this).attr("index", index);
+				$(this).attr("xpathor_block_id", block_id);
+			});
+			return elem;
 		}
-		$("body").append("<div class='xpathor-preview-block' used='false' xpathor_preview_index=" + index + ">" + 
-			"<div class='xpathor-preview-buttons'><span class='xpathor-preview-edit' index=" + index + ">Edit</span>" + 
-			"<span class='xpathor-preview-delete' index=" + index + ">Delete</span><span class='xpathor-preview-hide' index=" + index + 
+		$("body").append("<div class='xpathor-preview-block' used='false' xpathor_preview_index=" + index + " xpathor_block_id=\"" + block_id + "\">" + 
+			"<div class='xpathor-preview-buttons'><span class='xpathor-preview-edit' index=" + index + 
+			" xpathor_block_id=\"" + block_id + "\">Edit</span>" + "<span class='xpathor-preview-delete' index=" + index + 
+			" xpathor_block_id=\"" + block_id + "\">Delete</span><span class='xpathor-preview-hide' index=" + index + 
 			">Hide</span></div>" + "<div class='xpathor-preview-category'></div></div>");
 		var elems = $("div[class='xpathor-preview-block'][used='false']");
 		if (elems.length > 0){
-			return elems[0];
+			var elem = elems[0];
+			$(elem).attr("xpathor_preview_index", index);
+			$(elem).attr("xpathor_block_id", block_id);
+			$("span", $(elem)).each(function(){
+				$(this).attr("index", index);
+				$(this).attr("xpathor_block_id", block_id);
+			});
+			return elem;
 		}
 		console.log("Error: create preview block failed");
 	},
@@ -399,7 +414,7 @@ var PortalProcessor = Processor.extend({
 			}
 			var block = results[i].block;
 			// TODO need to record template id for later management, like delete, edit, etc.
-			var preview_block = this._get_preview_block_div(i);
+			var preview_block = this._get_preview_block_div(i, results[i].blockId);
 			var p = $(block).offset();
 			var width = $(block).width();
 			var height = $(block).outerHeight();
@@ -414,6 +429,8 @@ var PortalProcessor = Processor.extend({
 				var pre_block = $("div[xpathor_preview_index=\"" + index + "\"]");
 				$(pre_block).css({left: 0, top: 0, width: 0, height: 0});
 				$(pre_block).attr("used", "false");
+				$(pre_block).attr("xpathor_preview_index", "");
+				$(pre_block).attr("xpathor_block_id", "");
 				$(".xpathor-preview-news", $("*[xpathor_preview_block_index=\"" + index + "\"]")).each(function(){
 					$(this).removeClass("xpathor-preview-news");
 				});
@@ -424,13 +441,66 @@ var PortalProcessor = Processor.extend({
 				var pre_block = $("div[xpathor_preview_index=\"" + index + "\"]");
 				$(pre_block).css({left: 0, top: 0, width: 0, height: 0});
 				$(pre_block).attr("used", "false");
+				$(pre_block).attr("xpathor_preview_index", "");
+				$(pre_block).attr("xpathor_block_id", "");
 				$(".xpathor-preview-news", $("*[xpathor_preview_block_index=\"" + index + "\"]")).each(function(){
 					$(this).removeClass("xpathor-preview-news");
 				});
+				var bid = $(this).attr("xpathor_block_id");
+				TemplateManager.delete_block(bid);
 			});
 			$(".xpathor-preview-edit", $(preview_block)).click(function(){
+				var bid = $(this).attr("xpathor_block_id");
 				// TODO finish this
+				obj._create_edit_dialog(bid);
+				obj._edit_dialog_elem.toggleClass("dialog-show");
 			});
+		}
+	},
+
+	_create_edit_dialog: function(block_id){
+		// create dialog to let user select category, news status, headline status, etc.
+		if (this._edit_dialog_elem == null){
+			var template = TemplateManager.get_block(block_id);
+			$("body").append('<div id="xpathor_edit_dialog" class="xpathor-dialog">' + 
+				'<div id="xpathor_dialog_edit_category" class="selection-block category">' + this._category_selection + '</div>' + 
+				'<div id="xpathor_dialog_edit_headline" class="selection-block headline">' + this._priority_selection + '</div>' +
+				'<div id="xpathor_dialog_edit_normal" class="selection-block normal">' + this._priority_selection + '</div>' +
+				'<div id="xpathor_dialog_edit_block" class="selection-block"><input type="text" value=\'' + template.block + '\' /></div>' +
+				'<div class="selection-buttons"><input type="button" value="取消" id="xpathor_edit_dialog_cancel" class="xpathor-dialog-button"></input>' + 
+				'<input type="button" value="确定" id="xpathor_edit_dialog_confirm" class="xpathor-dialog-button confirm"></input></div>' +
+				'</div>');
+			// add event listener for buttons
+			var obj = this;
+			$("#xpathor_edit_dialog_cancel").click(function(){
+				$("#xpathor_edit_dialog").toggleClass("dialog-show");
+				return false;
+			});
+			$("#xpathor_edit_dialog_confirm").click(function(){
+				var cate = $("#xpathor_dialog_edit_category .dialog-select").val();
+				if (cate == "-1"){
+					alert("Please select category of news block!");
+					return;
+				}
+				var headline_p = $("#xpathor_dialog_edit_headline .dialog-select").val();
+				if (headline_p == "-1"){
+					alert("Please select priority of headline news!");
+					return;
+				}
+				var normal_p = $("#xpathor_dialog_edit_normal .dialog-select").val();
+				if (normal_p == "-1"){
+					alert("Please select priority of normal news!");
+					return;
+				}
+				console.log(cate);
+				console.log(headline_p);
+				console.log(normal_p);
+				// update templates and preview result
+				// hide dialog
+				$("#xpathor_edit_dialog").toggleClass("dialog-show");
+				return false;
+			});
+			this._edit_dialog_elem = $("#xpathor_edit_dialog");
 		}
 	},
 

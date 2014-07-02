@@ -26,19 +26,30 @@ function login(){
 }
 
 function preview_blocks(){
-    console.log("[Popup] preview blocks");
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {name: "preview_blocks", template: TEMPLATE, url: tabs[0].url}, function(response) {
-            console.log("[Popup] Response from preview_news: " + response.success);
+    var html = $("#preview_blocks_btn").html();
+    if (html == "Stop Preview"){
+        console.log("[Popup] stop preview blocks");
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {name: "stop_preview_blocks", url: tabs[0].url}, function(response) {
+                console.log("[Popup] Response from stop preview_news: " + response.success);
+            });
+            window.close();
+        });       
+    } else {
+        console.log("[Popup] preview blocks");
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {name: "preview_blocks", url: tabs[0].url}, function(response) {
+                console.log("[Popup] Response from preview_news: " + response.success);
+            });
+            window.close();
         });
-        window.close();
-    });
+    }
 }
 
 function load_template(url){
     // load template in popup scripts
     //$.get("http://10.2.8.221/admin/template/api/get?lc=zh-cn&type=portal&key=" + url, function(data){
-    $.get("http://10.2.8.221/admin/template/api/get?lc=zh-cn&type=portal&key=" + url, function(data){
+    $.get("http://dzone.dolphin.com/admin/template/api/get?lc=zh-cn&type=portal&key=" + url, function(data){
         if (data['data'].length == 0){
             // new site, show extract links button
             $("#extract_link_btn").toggleClass("hide");
@@ -81,6 +92,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (template.type == "portal"){
                     $("#preview_blocks_btn").toggleClass("hide");
                     $("#add_blocks_btn").toggleClass("hide");
+                    if (response.previewing){
+                        $("#preview_blocks_btn").html("Stop Preview");
+                    }
                 } else if (template.type == "news"){
 
                 } else {
