@@ -74,23 +74,30 @@ chrome.runtime.onMessage.addListener(
             console.log("preview block from portal in main.js");
         } else if (request.name == "stop_preview_blocks") {
             $(".xpathor-preview-block").each(function(){
-                var index = parseInt($(this).attr("xpathor_preview_index"));
-                var pre_block = $("div[xpathor_preview_index=\"" + index + "\"]");
+                var pre_block = $(this);
+                var block_id = $(pre_block).attr("xpathor_block_id");
                 $(pre_block).css({left: 0, top: 0, width: 0, height: 0});
                 $(pre_block).attr("used", "false");
-                $(pre_block).attr("xpathor_preview_index", "");
                 $(pre_block).attr("xpathor_block_id", "");
-                $(".xpathor-preview-news", $("*[xpathor_preview_block_index=\"" + index + "\"]")).each(function(){
+                $(".xpathor-preview-news", $("*[xpathor_preview_block_id=\"" + block_id + "\"]")).each(function(){
                     $(this).removeClass("xpathor-preview-news");
                 });
+                $("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
             });
         } else if (request.name == "template_exists"){
             // whether template already exists, called by popup
             var response = {success: true};
             response.template = TemplateManager.template;
             response.previewing = $("div[class='xpathor-preview-block'][used='true']").length > 0;
+            response.changed = TemplateManager.changed;
             sendResponse(response);
             return;
+        } else if (request.name == "get_template"){
+            var response = {success: true};
+            if (TemplateManager.changed){
+                response.template = TemplateManager.template;
+            }
+            sendResponse(response);
         } else if (request.name == "set_template"){
             // set template value, called by popup
             var template = request.template;

@@ -3,37 +3,35 @@ var TemplateManager = {
 	template: null,
 	changed: false,
 
-	// save portal template
-	save_portal_template: function(template, callback){
-		var obj = {};
-		obj[window.location.href] = {
-			type: "portal",
-			blocks: template,
-		};
-		console.log(obj);
-		chrome.storage.local.set(obj, callback);
-		this.unsave = true;
-	},
-	// update portal template
-	update_portal_template: function(update_map){
-		// update template by block id, here need to handle situation
-	},
-	// get portal template
-	get_portal_template: function(callback, obj){
-		chrome.storage.local.get(window.location.href, function(result){
-			callback.call(obj, result);
-		});
-	},
 
-	_validate_block_id: function(blocks, auto_generate_id){
+	_generate_block_id: function(){
+		var sample = null, max_index = 0;
+		for (var i=0; i < this.template.blocks.length; i++){
+			if (this.template.blocks[i].id != null && this.template.blocks[i].id != undefined){
+				sample = this.template.blocks[i].id;
+				var index = parseInt(this.template.blocks[i].id.split("B")[1]);
+				if (index > max_index){
+					max_index = index;
+				}
+			}
+		}
+		if (sample == null){
+			sample = "";
+		} else {
+			sample = sample.split("B")[0];
+		}
+		max_index += 1;
+		return sample + "B" + max_index;
+	},
+	_validate_block_id: function(auto_generate_id){
 		// validate block, if some block has no id, if should auto generate id, 
 		// do not return invalid status, but auto generate id for block. else
 		// return invalid status.
-		for (var i=0; i < blocks.length; i++){
-			if (blocks[i].id == null || blocks[i].id == undefined){
+		for (var i=0; i < this.template.blocks.length; i++){
+			if (this.template.blocks[i].id == null || this.template.blocks[i].id == undefined){
 				// has no id
 				if (auto_generate_id){
-					blocks[i].id = this._generate_block_id(blocks);
+					this.template.blocks[i].id = this._generate_block_id();
 				} else {
 					return false;
 				}
@@ -41,11 +39,12 @@ var TemplateManager = {
 		}
 		return true;
 	},
-
 	set_template: function(template, loaded){
 		// validate portal template, if id not exists, generate one
 		this.template = template;
-		if (template.type == "portal" && !this._validate_block_id(template.blocks, !loaded)){
+		// if loaded template has no id, generate one used in xpathor, and delete id
+		// while updating.
+		if (template.type == "portal" && !this._validate_block_id(true)){
 			alert("loaded template invalid, some block has no id");
 			return;
 		}
@@ -61,10 +60,35 @@ var TemplateManager = {
 		}
 	},
 	edit_block: function(block_id, update_map){
-
+		for (var i=0; i < this.template.blocks.length; i++){
+			if (this.template.blocks[i].id == block_id){
+				this.template.blocks[i].category = update_map.category;
+				this.template.blocks[i].headline_status = update_map.headline_status;
+				this.template.blocks[i].status = update_map.status;
+				this.template.blocks[i].headline = update_map.headline;
+				this.template.blocks[i].news = update_map.news;
+				this.changed = true;
+				break;
+			}
+		}
 	},
-	add_block: function(new_block){
-
+	add_blocks: function(blocks){
+		if (blocks.length == 0){
+			return;
+		}
+		if (this.template == null){
+			this.template = {
+				type: "portal",
+				link: window.location.href,
+				new: true,
+				blocks: [],
+			};
+		}
+		for (var i=0; i < blocks.length; i++){
+			this.template.blocks.push(blocks[i]);
+		}
+		this._validate_block_id(true);
+		this.changed = true;
 	},
 	get_block: function(block_id){
 		for (var i=0; i < this.template.blocks.length; i++){

@@ -271,6 +271,9 @@ a.xpathor-boxclose{
 .selection-block {
 	width: 90%;
 }
+.selection-block input{
+	width: 196px;
+}
 .selection-block.category:before {
 	content: "Category";
 	padding-right: 112px;
@@ -284,6 +287,21 @@ a.xpathor-boxclose{
 .selection-block.normal:before {
 	content: "Normal News Priority";
 	padding-right: 40px;
+}
+
+.selection-block.block:before {
+	content: "Block Xpath";
+	padding-right: 94px;
+}
+
+.selection-block.headline-xpath:before {
+	content: "Headlien Xpath";
+	padding-right: 76px;
+}
+
+.selection-block.news-xpath:before {
+	content: "News Xpath";
+	padding-right: 100px;
 }
 
 .selection-buttons {

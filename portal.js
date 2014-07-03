@@ -143,8 +143,8 @@ var PortalProcessor = Processor.extend({
 					return;
 				}
 				obj.message.data.category = cate;
-				obj.message.data.headline_priority = headline_p;
-				obj.message.data.normal_priority = normal_p;
+				obj.message.data.headline_status = headline_p;
+				obj.message.data.status = normal_p;
 				// save blocks
 				var block = {};
 				block.block = obj.message.data.block;
@@ -152,8 +152,8 @@ var PortalProcessor = Processor.extend({
 				block.headline = obj.message.data.headline;
 				block.index = obj.message.data.index;
 				block.category = obj.message.data.category;
-				block.headline_priority = obj.message.data.headline_priority;
-				block.normal_priority = obj.message.data.normal_priority;
+				block.headline_status = obj.message.data.headline_status;
+				block.status = obj.message.data.status;
 				obj.message.blocks.push(block);
 				$("#xpathor_dialog").toggleClass("dialog-show");
 				callback.call(obj, obj.message);
@@ -196,16 +196,16 @@ var PortalProcessor = Processor.extend({
 			template += '            "category": ' + message.blocks[i].category + ',\n';
 			template += '            "news": \'' + message.blocks[i].news + '\',\n';
 			template += '            "headline": \'' + message.blocks[i].headline + '\',\n';
-			template += '            "headline_status": ' + message.blocks[i].headline_priority + ',\n';
-			template += '            "status": ' + message.blocks[i].normal_priority + ',\n';
+			template += '            "headline_status": ' + message.blocks[i].headline_status + ',\n';
+			template += '            "status": ' + message.blocks[i].status + ',\n';
 			template += '        },\n';
 			console.log("block: " + message.blocks[i].block);
 			console.log("index: " + message.blocks[i].index);
 			console.log("news: " + message.blocks[i].news);
 			console.log("headline: " + message.blocks[i].headline);
 			console.log("category: " + message.blocks[i].category);
-			console.log("headline priority: " + message.blocks[i].headline_priority);
-			console.log("normal priority: " + message.blocks[i].normal_priority);
+			console.log("headline priority: " + message.blocks[i].headline_status);
+			console.log("normal priority: " + message.blocks[i].status);
 		}
 		template += '    ],\n';
 		console.log(template);
@@ -213,7 +213,8 @@ var PortalProcessor = Processor.extend({
 		console.log("copy finish");
 		// save template to local storage
 		// TODO generate block id
-		XpathorStorage.save_portal_template(message.blocks);
+		//XpathorStorage.save_portal_template(message.blocks);
+		TemplateManager.add_blocks(message.blocks);
 		// preview result
 		this._preview_by_templates(message);
 	},
@@ -256,10 +257,8 @@ var PortalProcessor = Processor.extend({
 				}
 				item.title = $(headlines[j]).text().trim();
 				item.category = template.category;
-				item.status = template.headline_priority;
+				item.status = template.headline_status;
 				item.elem = headlines[j];
-				console.log(item.url);
-				console.log(item.title);
 				result.push(item);
 				urls.push(item.url);
 			}
@@ -277,10 +276,8 @@ var PortalProcessor = Processor.extend({
 				}
 				item.title = $(news[j]).text().trim();
 				item.category = template.category;
-				item.status = template.normal_priority;
+				item.status = template.status;
 				item.elem = news[j];
-				console.log(item.url);
-				console.log(item.title);
 				result.push(item);
 				urls.push(item.url);
 			}
@@ -307,8 +304,6 @@ var PortalProcessor = Processor.extend({
 			console.log("Error: can not find block by id: " + block_id);
 			return;
 		}
-		block.normal_priority = block.status;
-		block.headline_priority = block.headline_status;
 		var ext = block_id[block_id.length-1];
 		if (ext == "1"){
 			block.news = "";
@@ -369,30 +364,26 @@ var PortalProcessor = Processor.extend({
 	},
 
 	// get block preview div. If no available, create one
-	_get_preview_block_div: function(index, block_id){
+	_get_preview_block_div: function(block_id){
 		var elems = $("div[class='xpathor-preview-block'][used='false']");
 		if (elems.length > 0){
 			var elem = elems[0];
-			$(elem).attr("xpathor_preview_index", index);
 			$(elem).attr("xpathor_block_id", block_id);
 			$("span", $(elem)).each(function(){
-				$(this).attr("index", index);
 				$(this).attr("xpathor_block_id", block_id);
 			});
 			return elem;
 		}
-		$("body").append("<div class='xpathor-preview-block' used='false' xpathor_preview_index=" + index + " xpathor_block_id=\"" + block_id + "\">" + 
-			"<div class='xpathor-preview-buttons'><span class='xpathor-preview-edit' index=" + index + 
-			" xpathor_block_id=\"" + block_id + "\">Edit</span>" + "<span class='xpathor-preview-delete' index=" + index + 
-			" xpathor_block_id=\"" + block_id + "\">Delete</span><span class='xpathor-preview-hide' index=" + index + 
+		$("body").append("<div class='xpathor-preview-block' used='false' xpathor_block_id=\"" + block_id + "\">" + 
+			"<div class='xpathor-preview-buttons'><span class='xpathor-preview-edit'" + 
+			" xpathor_block_id=\"" + block_id + "\">Edit</span>" + "<span class='xpathor-preview-delete' " + 
+			" xpathor_block_id=\"" + block_id + "\">Delete</span><span class='xpathor-preview-hide' " + 
 			">Hide</span></div>" + "<div class='xpathor-preview-category'></div></div>");
 		var elems = $("div[class='xpathor-preview-block'][used='false']");
 		if (elems.length > 0){
 			var elem = elems[0];
-			$(elem).attr("xpathor_preview_index", index);
 			$(elem).attr("xpathor_block_id", block_id);
 			$("span", $(elem)).each(function(){
-				$(this).attr("index", index);
 				$(this).attr("xpathor_block_id", block_id);
 			});
 			return elem;
@@ -414,64 +405,66 @@ var PortalProcessor = Processor.extend({
 			}
 			var block = results[i].block;
 			// TODO need to record template id for later management, like delete, edit, etc.
-			var preview_block = this._get_preview_block_div(i, results[i].blockId);
+			var preview_block = this._get_preview_block_div(results[i].blockId);
 			var p = $(block).offset();
 			var width = $(block).width();
 			var height = $(block).outerHeight();
 			$(preview_block).css({left: p.left, top: p.top - 24, width: width, height: height + 24});
 			$(preview_block).attr("used", "true");
 			// set extra attr on preview block to get later
-			$(block).attr("xpathor_preview_block_index", i);
+			$(block).attr("xpathor_preview_block_id", results[i].blockId);
 			// update cateogry
 			$(".xpathor-preview-category", $(preview_block)).html(this._category_map[results[i].category]);
 			$(".xpathor-preview-hide", $(preview_block)).click(function(){
-				var index = parseInt($(this).attr("index"));
-				var pre_block = $("div[xpathor_preview_index=\"" + index + "\"]");
+				var block_id = $(this).attr("xpathor_block_id");
+				var pre_block = $(this).parent().parent();
 				$(pre_block).css({left: 0, top: 0, width: 0, height: 0});
 				$(pre_block).attr("used", "false");
-				$(pre_block).attr("xpathor_preview_index", "");
 				$(pre_block).attr("xpathor_block_id", "");
-				$(".xpathor-preview-news", $("*[xpathor_preview_block_index=\"" + index + "\"]")).each(function(){
+				$(".xpathor-preview-news", $("*[xpathor_preview_block_id=\"" + block_id + "\"]")).each(function(){
 					$(this).removeClass("xpathor-preview-news");
 				});
+				$("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
 			});
 			$(".xpathor-preview-delete", $(preview_block)).click(function(){
-				// TODO send message to delete block
-				var index = parseInt($(this).attr("index"));
-				var pre_block = $("div[xpathor_preview_index=\"" + index + "\"]");
+				var block_id = $(this).attr("xpathor_block_id");
+				var pre_block = $(this).parent().parent();
 				$(pre_block).css({left: 0, top: 0, width: 0, height: 0});
 				$(pre_block).attr("used", "false");
-				$(pre_block).attr("xpathor_preview_index", "");
 				$(pre_block).attr("xpathor_block_id", "");
-				$(".xpathor-preview-news", $("*[xpathor_preview_block_index=\"" + index + "\"]")).each(function(){
+				$(".xpathor-preview-news", $("*[xpathor_preview_block_id=\"" + block_id + "\"]")).each(function(){
 					$(this).removeClass("xpathor-preview-news");
 				});
-				var bid = $(this).attr("xpathor_block_id");
-				TemplateManager.delete_block(bid);
+				$("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
+				TemplateManager.delete_block(block_id);
 			});
 			$(".xpathor-preview-edit", $(preview_block)).click(function(){
+				console.log("edit click");
 				var bid = $(this).attr("xpathor_block_id");
-				// TODO finish this
-				obj._create_edit_dialog(bid);
-				obj._edit_dialog_elem.toggleClass("dialog-show");
+				console.log(bid);
+				obj._create_edit_dialog(bid, obj);
+				console.log("create dialog finished");
+				$("#xpathor_edit_dialog").toggleClass("dialog-show");
+				cosole.log("show dialog");
 			});
 		}
 	},
 
-	_create_edit_dialog: function(block_id){
+	_create_edit_dialog: function(block_id, obj){
+		console.log(this);
 		// create dialog to let user select category, news status, headline status, etc.
 		if (this._edit_dialog_elem == null){
-			var template = TemplateManager.get_block(block_id);
 			$("body").append('<div id="xpathor_edit_dialog" class="xpathor-dialog">' + 
 				'<div id="xpathor_dialog_edit_category" class="selection-block category">' + this._category_selection + '</div>' + 
 				'<div id="xpathor_dialog_edit_headline" class="selection-block headline">' + this._priority_selection + '</div>' +
 				'<div id="xpathor_dialog_edit_normal" class="selection-block normal">' + this._priority_selection + '</div>' +
-				'<div id="xpathor_dialog_edit_block" class="selection-block"><input type="text" value=\'' + template.block + '\' /></div>' +
+				'<div id="xpathor_dialog_edit_block" class="selection-block block"><input disabled type="text" value=\'\' /></div>' +
+				'<div id="xpathor_dialog_edit_headline_xpath" class="selection-block headline-xpath"><input type="text" value=\'\' /></div>' +
+				'<div id="xpathor_dialog_edit_news_xpath" class="selection-block news-xpath"><input type="text" value=\'\' /></div>' +
 				'<div class="selection-buttons"><input type="button" value="取消" id="xpathor_edit_dialog_cancel" class="xpathor-dialog-button"></input>' + 
 				'<input type="button" value="确定" id="xpathor_edit_dialog_confirm" class="xpathor-dialog-button confirm"></input></div>' +
 				'</div>');
 			// add event listener for buttons
-			var obj = this;
 			$("#xpathor_edit_dialog_cancel").click(function(){
 				$("#xpathor_edit_dialog").toggleClass("dialog-show");
 				return false;
@@ -492,16 +485,44 @@ var PortalProcessor = Processor.extend({
 					alert("Please select priority of normal news!");
 					return;
 				}
-				console.log(cate);
-				console.log(headline_p);
-				console.log(normal_p);
-				// update templates and preview result
+				var headline_xpath = $("#xpathor_dialog_edit_headline_xpath input").val();
+				var news_xpath = $("#xpathor_dialog_edit_news_xpath input").val();
+				// update templates and re-preview result
+				var block_id = $(this).attr("xpathor_block_id");
+				TemplateManager.edit_block(block_id, {category: parseInt(cate), headline_status: parseInt(headline_p), 
+					status: parseInt(normal_p), headline: headline_xpath, news: news_xpath});
+				obj.refresh_block_preview.call(obj, block_id);
 				// hide dialog
 				$("#xpathor_edit_dialog").toggleClass("dialog-show");
 				return false;
 			});
 			this._edit_dialog_elem = $("#xpathor_edit_dialog");
 		}
+		// update dialog values
+		$("#xpathor_edit_dialog_confirm").attr("xpathor_block_id", block_id);
+		var block = TemplateManager.get_block(block_id);
+		$("#xpathor_dialog_edit_category select").val(block.category);
+		$("#xpathor_dialog_edit_headline select").val(block.headline_status);
+		$("#xpathor_dialog_edit_normal select").val(block.status);
+		$("#xpathor_dialog_edit_block input").val(block.block);
+		$("#xpathor_dialog_edit_headline_xpath input").val(block.headline);
+		$("#xpathor_dialog_edit_news_xpath input").val(block.news);
+	},
+
+	refresh_block_preview: function(block_id){
+		// refresh preview result of block 
+		// first, stop preview block
+		var pre_block = $("div[class='xpathor-preview-block'][xpathor_block_id='" + block_id + "']")[0];
+        $(pre_block).css({left: 0, top: 0, width: 0, height: 0});
+        $(pre_block).attr("used", "false");
+        $(pre_block).attr("xpathor_block_id", "");
+        $(".xpathor-preview-news", $("*[xpathor_preview_block_id=\"" + block_id + "\"]")).each(function(){
+            $(this).removeClass("xpathor-preview-news");
+        });
+        $("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
+        // then, preview by new template
+        var template = TemplateManager.get_block(block_id);
+        this._preview_by_templates({blocks: [template]})
 	},
 
 	// start to extracting and generating xpath
