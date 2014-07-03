@@ -259,52 +259,52 @@ a.xpathor-boxclose{
 	color: black;
 	line-height: 20px;
 }
-.xpathor-dialog.dialog-show {
+.xpathor-dialog.xpathor-dialog-show {
 	visibility: visible;
 	opacity: 1;
 }
 
-.dialog-select {
+.xpathor-dialog-select {
 	width: 200px;
 }
 
-.selection-block {
+.xpathor-selection-block {
 	width: 90%;
 }
-.selection-block input{
+.xpathor-selection-block input{
 	width: 196px;
 }
-.selection-block.category:before {
+.xpathor-selection-block.xpathor-category:before {
 	content: "Category";
 	padding-right: 112px;
 }
 
-.selection-block.headline:before {
+.xpathor-selection-block.xpathor-headline:before {
 	content: "Headline News Priority";
 	padding-right: 28px;
 }
 
-.selection-block.normal:before {
+.xpathor-selection-block.xpathor-normal:before {
 	content: "Normal News Priority";
 	padding-right: 40px;
 }
 
-.selection-block.block:before {
+.xpathor-selection-block.block:before {
 	content: "Block Xpath";
 	padding-right: 94px;
 }
 
-.selection-block.headline-xpath:before {
+.xpathor-selection-block.xpathor-headline-xpath:before {
 	content: "Headlien Xpath";
 	padding-right: 76px;
 }
 
-.selection-block.news-xpath:before {
+.xpathor-selection-block.xpathor-news-xpath:before {
 	content: "News Xpath";
 	padding-right: 100px;
 }
 
-.selection-buttons {
+.xpathor-selection-buttons {
 	margin-top: 20px;
 }
 

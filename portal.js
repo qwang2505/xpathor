@@ -41,14 +41,14 @@ var PortalProcessor = Processor.extend({
 	},
 
 	_default_selection: '-1',
-	_category_selection: '<select class="dialog-select"><option value="-1" selected>------</option><option value="1">Important News</option>' + 
+	_category_selection: '<select class="xpathor-dialog-select"><option value="-1" selected>------</option><option value="1">Important News</option>' + 
 						'<option value="2">International</option><option value="3">National</option>' + 
 						'<option value="4">Society</option><option value="5">Entertainment</option>' +
 						'<option value="6">Sport</option><option value="7">Finance</option>' +
 						'<option value="8">Technology</option><option value="9">Military</option><option value="11">History</option>' +
 						'<option value="10">Auto</option><option value="13">Life</option><option value="20">Fashion</option>' + 
 						'<option value="18">Politics</option></select>',
-	_priority_selection: '<select class="dialog-select"><option value="-1" selected>------</option><option value="8">P0</option>' +
+	_priority_selection: '<select class="xpathor-dialog-select"><option value="-1" selected>------</option><option value="8">P0</option>' +
 						 '<option value="0">P1</option><option value="4">P2</option></select>',
 
 	show_tip: function(item_name){
@@ -114,30 +114,30 @@ var PortalProcessor = Processor.extend({
 		// create dialog to let user select category, news status, headline status, etc.
 		if (this._dialog_elem == null){
 			$("body").append('<div id="xpathor_dialog" class="xpathor-dialog">' + 
-				'<div id="xpathor_dialog_selection_category" class="selection-block category">' + this._category_selection + '</div>' + 
-				'<div id="xpathor_dialog_selection_headline" class="selection-block headline">' + this._priority_selection + '</div>' +
-				'<div id="xpathor_dialog_selection_normal" class="selection-block normal">' + this._priority_selection + '</div>' +
-				'<div class="selection-buttons"><input type="button" value="取消" id="xpathor_dialog_cancel" class="xpathor-dialog-button"></input>' + 
+				'<div id="xpathor_dialog_selection_category" class="xpathor-selection-block xpathor-category">' + this._category_selection + '</div>' + 
+				'<div id="xpathor_dialog_selection_headline" class="xpathor-selection-block xpathor-headline">' + this._priority_selection + '</div>' +
+				'<div id="xpathor_dialog_selection_normal" class="xpathor-selection-block xpathor-normal">' + this._priority_selection + '</div>' +
+				'<div class="xpathor-selection-buttons"><input type="button" value="取消" id="xpathor_dialog_cancel" class="xpathor-dialog-button"></input>' + 
 				'<input type="button" value="确定" id="xpathor_dialog_confirm" class="xpathor-dialog-button confirm"></input></div>' +
 				'</div>');
 			// add event listener for buttons
 			var obj = this;
 			$("#xpathor_dialog_cancel").click(function(){
-				$("#xpathor_dialog").toggleClass("dialog-show");
+				$("#xpathor_dialog").toggleClass("xpathor-dialog-show");
 				return false;
 			});
 			$("#xpathor_dialog_confirm").click(function(){
-				var cate = $("#xpathor_dialog_selection_category .dialog-select").val();
+				var cate = $("#xpathor_dialog_selection_category .xpathor-dialog-select").val();
 				if (cate == "-1"){
 					alert("Please select category of news block!");
 					return;
 				}
-				var headline_p = $("#xpathor_dialog_selection_headline .dialog-select").val();
+				var headline_p = $("#xpathor_dialog_selection_headline .xpathor-dialog-select").val();
 				if (headline_p == "-1"){
 					alert("Please select priority of headline news!");
 					return;
 				}
-				var normal_p = $("#xpathor_dialog_selection_normal .dialog-select").val();
+				var normal_p = $("#xpathor_dialog_selection_normal .xpathor-dialog-select").val();
 				if (normal_p == "-1"){
 					alert("Please select priority of normal news!");
 					return;
@@ -155,7 +155,7 @@ var PortalProcessor = Processor.extend({
 				block.headline_status = obj.message.data.headline_status;
 				block.status = obj.message.data.status;
 				obj.message.blocks.push(block);
-				$("#xpathor_dialog").toggleClass("dialog-show");
+				$("#xpathor_dialog").toggleClass("xpathor-dialog-show");
 				callback.call(obj, obj.message);
 				return false;
 			});
@@ -176,7 +176,7 @@ var PortalProcessor = Processor.extend({
 		this.message = message;
 		// prompt dislog to let user select category, status, headline status
 		this._create_select_dialog(this._next_block);
-		$("#xpathor_dialog").toggleClass("dialog-show");
+		$("#xpathor_dialog").toggleClass("xpathor-dialog-show");
 	},
 
 	_finish_blocks: function(message){
@@ -444,7 +444,7 @@ var PortalProcessor = Processor.extend({
 				console.log(bid);
 				obj._create_edit_dialog(bid, obj);
 				console.log("create dialog finished");
-				$("#xpathor_edit_dialog").toggleClass("dialog-show");
+				$("#xpathor_edit_dialog").toggleClass("xpathor-dialog-show");
 				cosole.log("show dialog");
 			});
 		}
@@ -455,32 +455,32 @@ var PortalProcessor = Processor.extend({
 		// create dialog to let user select category, news status, headline status, etc.
 		if (this._edit_dialog_elem == null){
 			$("body").append('<div id="xpathor_edit_dialog" class="xpathor-dialog">' + 
-				'<div id="xpathor_dialog_edit_category" class="selection-block category">' + this._category_selection + '</div>' + 
-				'<div id="xpathor_dialog_edit_headline" class="selection-block headline">' + this._priority_selection + '</div>' +
-				'<div id="xpathor_dialog_edit_normal" class="selection-block normal">' + this._priority_selection + '</div>' +
-				'<div id="xpathor_dialog_edit_block" class="selection-block block"><input disabled type="text" value=\'\' /></div>' +
-				'<div id="xpathor_dialog_edit_headline_xpath" class="selection-block headline-xpath"><input type="text" value=\'\' /></div>' +
-				'<div id="xpathor_dialog_edit_news_xpath" class="selection-block news-xpath"><input type="text" value=\'\' /></div>' +
-				'<div class="selection-buttons"><input type="button" value="取消" id="xpathor_edit_dialog_cancel" class="xpathor-dialog-button"></input>' + 
+				'<div id="xpathor_dialog_edit_category" class="xpathor-selection-block xpathor-category">' + this._category_selection + '</div>' + 
+				'<div id="xpathor_dialog_edit_headline" class="xpathor-selection-block xpathor-headline">' + this._priority_selection + '</div>' +
+				'<div id="xpathor_dialog_edit_normal" class="xpathor-selection-block xpathor-normal">' + this._priority_selection + '</div>' +
+				'<div id="xpathor_dialog_edit_block" class="xpathor-selection-block xpathor-block"><input disabled type="text" value=\'\' /></div>' +
+				'<div id="xpathor_dialog_edit_headline_xpath" class="xpathor-selection-block xpathor-headline-xpath"><input type="text" value=\'\' /></div>' +
+				'<div id="xpathor_dialog_edit_news_xpath" class="xpathor-selection-block xpathor-news-xpath"><input type="text" value=\'\' /></div>' +
+				'<div class="xpathor-selection-buttons"><input type="button" value="取消" id="xpathor_edit_dialog_cancel" class="xpathor-dialog-button"></input>' + 
 				'<input type="button" value="确定" id="xpathor_edit_dialog_confirm" class="xpathor-dialog-button confirm"></input></div>' +
 				'</div>');
 			// add event listener for buttons
 			$("#xpathor_edit_dialog_cancel").click(function(){
-				$("#xpathor_edit_dialog").toggleClass("dialog-show");
+				$("#xpathor_edit_dialog").toggleClass("xpathor-dialog-show");
 				return false;
 			});
 			$("#xpathor_edit_dialog_confirm").click(function(){
-				var cate = $("#xpathor_dialog_edit_category .dialog-select").val();
+				var cate = $("#xpathor_dialog_edit_category .xpathor-dialog-select").val();
 				if (cate == "-1"){
 					alert("Please select category of news block!");
 					return;
 				}
-				var headline_p = $("#xpathor_dialog_edit_headline .dialog-select").val();
+				var headline_p = $("#xpathor_dialog_edit_headline .xpathor-dialog-select").val();
 				if (headline_p == "-1"){
 					alert("Please select priority of headline news!");
 					return;
 				}
-				var normal_p = $("#xpathor_dialog_edit_normal .dialog-select").val();
+				var normal_p = $("#xpathor_dialog_edit_normal .xpathor-dialog-select").val();
 				if (normal_p == "-1"){
 					alert("Please select priority of normal news!");
 					return;
@@ -493,7 +493,7 @@ var PortalProcessor = Processor.extend({
 					status: parseInt(normal_p), headline: headline_xpath, news: news_xpath});
 				obj.refresh_block_preview.call(obj, block_id);
 				// hide dialog
-				$("#xpathor_edit_dialog").toggleClass("dialog-show");
+				$("#xpathor_edit_dialog").toggleClass("xpathor-dialog-show");
 				return false;
 			});
 			this._edit_dialog_elem = $("#xpathor_edit_dialog");
