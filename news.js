@@ -23,25 +23,25 @@ var ImageExtractor = {
 	},
 
 	_validate_image: function(image, src){
-		console.log("valid image: ");
-		console.log(image);
+		//console.log("valid image: ");
+		//console.log(image);
 		var response = {};
 		var width = $(image).width();
 		var height = $(image).height();
-		console.log("width: " + width + ", height: " + height);
+		//console.log("width: " + width + ", height: " + height);
 		response.width = width;
 		response.height = height;
 		if (width == 0 && height == 0){
 			response.valid = true;
-			console.log("get image size failed, seem as valid");
+			//console.log("get image size failed, seem as valid");
 			return response;
 		} else if (width < this._args.valid_size_threshold || height < this._args.valid_size_threshold){
 			response.valid = false;
-			console.log("validate image failed, width or height small");
+			//console.log("validate image failed, width or height small");
 			return response;
 		} else if (width / height > this._args.valid_ratio_threshold){
 			response.valid = false;
-			console.log("validate image failed, ration large");
+			//console.log("validate image failed, ration large");
 			return response;
 		} else {
 			response.valid = true;
@@ -64,8 +64,8 @@ var ImageExtractor = {
 	 * main API of ImageExtractor.
 	 */
 	extract_images: function(node){
-		console.log("extract images from ");
-		console.log(node);
+		//console.log("extract images from ");
+		//console.log(node);
 		var pictures = [];
 		if (node == null || node == undefined){
 			return pictures;
@@ -75,8 +75,8 @@ var ImageExtractor = {
 		if (imgs == null || imgs == undefined || imgs.length == 0){
 			return pictures;
 		}
-		console.log("got images ");
-		console.log(imgs);
+		//console.log("got images ");
+		//console.log(imgs);
 		var result, score, image;
 		for (var i=0; i < imgs.length; i++){
 			var src = this._handle_src_func(imgs[i]);
@@ -254,19 +254,33 @@ var NewsProcessor = Processor.extend({
 		return;
 	},
 
+	fill_template: function(template){
+		// TODO finish this
+		template.domain = "";
+		template.pattern = "";
+		template.title = XpathEvaluator.fill_xpath(template.title, "text");
+		template.source = XpathEvaluator.fill_xpath(template.source, "full_text");
+		template.pubDate = XpathEvaluator.fill_xpath(template.pubDate, "full_text");
+		template.nextPage = XpathEvaluator.fill_xpath(template.nextPage, "attr", "href");
+		return template;
+	},
+
 	// post process data, preview, etc.
 	post_process: function(message){
-		// log xpath
-		console.log("[News] title xpath: " + message.data.title);
-		console.log("[News] content xpath: " + message.data.content);
-		console.log("[News] source xpath: " + message.data.source);
-		console.log("[News] publish time xpath: " + message.data.publish_time);
-		console.log("[News] next page xpath: " + message.data.next_page);
 		var template = new NewsTemplate(message.data);
+		template = this.fill_template(template);
+		// log xpath
+		console.log("[News] title xpath: " + template.title);
+		console.log("[News] content xpath: " + template.content);
+		console.log("[News] source xpath: " + template.source);
+		console.log("[News] publish time xpath: " + template.pubDate);
+		console.log("[News] next page xpath: " + template.nextPage);
+
 		var result = this.extract(template);
 		// TODO valid result
 		// save temporary templates
-		XpathorStorage.save_temp_template(document.location.host, "news", template);
+		//XpathorStorage.save_temp_template(document.location.host, "news", template);
+		TemplateManager.set_news_template([template], true);
 		// TODO preview result
 		this._preview(result);
 		// TODO save extract result
@@ -275,19 +289,19 @@ var NewsProcessor = Processor.extend({
 	// extract news detail by given template
 	extract: function(template){
 		var result = new ExtractResult();
-		result.title = XpathEvaluator.evaluate(document, XpathEvaluator.fill_xpath(template.title, "text"));
-		console.log("[News] get title: " + result.title);
+		result.title = XpathEvaluator.evaluate(document, template.title);
+		//console.log("[News] get title: " + result.title);
 		result.content = XpathEvaluator.evaluate(document, template.content);
 		result.content = this._extract_content(result.content);
-		console.log("[News] get content node: " + result.content);
-		result.source = XpathEvaluator.evaluate(document, XpathEvaluator.fill_xpath(template.source, "full_text"));
+		//console.log("[News] get content node: " + result.content);
+		result.source = XpathEvaluator.evaluate(document, template.source);
 		result.source = this._extract_source(result.source);
-		console.log("[News] get source: " + result.source);
-		result.pubDate = XpathEvaluator.evaluate(document, XpathEvaluator.fill_xpath(template.pubDate, "full_text"));
+		//console.log("[News] get source: " + result.source);
+		result.pubDate = XpathEvaluator.evaluate(document, template.pubDate);
 		result.pubDate = this._extract_time(result.pubDate);
-		console.log("[News] get publish date: " + result.pubDate);
-		result.nextPage = XpathEvaluator.evaluate(document, XpathEvaluator.fill_xpath(template.nextPage, "full_text"));
-		console.log("[News] get next page: " + result.nextPage);
+		//console.log("[News] get publish date: " + result.pubDate);
+		result.nextPage = XpathEvaluator.evaluate(document, template.nextPage);
+		//console.log("[News] get next page: " + result.nextPage);
 		return result;
 	},
 
@@ -298,21 +312,32 @@ var NewsProcessor = Processor.extend({
 		}
 		// TODO use first template for now 
 		var template = result[document.location.host][0];
-		console.log("get template: ");
-		console.log(template);
-		console.log(this.extract);
+		//console.log("get template: ");
+		//console.log(template);
+		//console.log(this.extract);
 		var result = this.extract(template);
 		this._preview(result);
 	},
 
 	// preview extracting result
-	preview: function(){
-		// get template from local storage
-		XpathorStorage.load_temp_template(document.location.host, "news", this._preview_by_templates, this);
-	},
-
-	_save_result: function(result){
-
+	preview: function(templates){
+		// preview result by templates list
+		var result = null;
+		for (var i=0; i < templates.length; i++){
+			try{
+				result = this.extract(templates[i]);	
+			} catch (err){
+				console.log("error extract use template: ");
+				console.log(templates[i]);
+				continue;
+			}
+			if (result.valid()){
+				console.log("preview result");
+				console.log(result);
+				this._preview(result);
+				break;
+			}
+		}
 	},
 
 	// preview extract result, put result in new div and show if need to.
@@ -377,8 +402,8 @@ var NewsProcessor = Processor.extend({
 		for (var i=0; i < elements.length; i++){
 			elem = $(elements[i]);
 			if (elem.css("display") == "none"){
-				console.log("[ContentExtractor] remove hidden: ");
-				console.log(elements[i]);
+				//console.log("[ContentExtractor] remove hidden: ");
+				//console.log(elements[i]);
 				unlikely_elems.push(elements[i]);
 				continue;
 			}
@@ -391,25 +416,25 @@ var NewsProcessor = Processor.extend({
 
 			match = this._args.unlikelyRe.exec(path);
 			if (match != null){
-				console.log("[ContentExtractor] remove because match unlikely regex: ");
-				console.log(elements[i]);
+				//console.log("[ContentExtractor] remove because match unlikely regex: ");
+				//console.log(elements[i]);
 				unlikely_elems.push(elements[i]);
 				continue;
 			} else if (link_density > 0.2 && text.length < 30 && this._args.unlikelyTextRe.exec(text) != null){
-				console.log("[ContentExtractor] remove because have links and sensitive words: ");
-				console.log(elements[i]);
+				//console.log("[ContentExtractor] remove because have links and sensitive words: ");
+				//console.log(elements[i]);
 				unlikely_elems.push(elements[i]);
 				continue;
 			} else if (link_density > 0.4 && imgs == 0 && text.length > 30){
-				console.log("[ContentExtractor] remove because link density high and no image and long text: link density: " + link_density);
-				console.log(elements[i]);
+				//console.log("[ContentExtractor] remove because link density high and no image and long text: link density: " + link_density);
+				//console.log(elements[i]);
 				unlikely_elems.push(elements[i]);
 				continue;
 			} else if (lis > ps){
 				var links = elem.xpath("a");
 				if (links.length >= lis){
-					console.log("[ContentExtractor] remove because more lis and links than ps: ");
-					console.log(elements[i]);
+					//console.log("[ContentExtractor] remove because more lis and links than ps: ");
+					//console.log(elements[i]);
 					unlikely_elems.push(elements[i]);
 					continue;
 				}
@@ -444,8 +469,8 @@ var NewsProcessor = Processor.extend({
 		var tag = raw_node.tagName;
 		// skip over title
 		if (tag == "H1"){
-			console.log("[ContentExtractor] got h1 title, remove it.");
-			console.log(node);
+			//console.log("[ContentExtractor] got h1 title, remove it.");
+			//console.log(node);
 			return all_text;
 		}
 		if (this._args.noTextTags.indexOf(tag) != -1){
@@ -543,7 +568,7 @@ var NewsProcessor = Processor.extend({
 				}
 				// remove original title line
 				if (this._args.oriTitleRe.exec(para) != null){
-					console.log("[ContentExtractor] remove original title: " + para);
+					//console.log("[ContentExtractor] remove original title: " + para);
 					rmv_list.push(paragraph);
 					i += 1;
 					continue;
@@ -552,7 +577,7 @@ var NewsProcessor = Processor.extend({
 				if (this._args.urlRe.exec(para) != null){
 					var pa = para.replace(this._args.urlRe, "");
 					if (pa.trim().length < min_length){
-						console.log("[ContentExtractort] remove short paragragh which contains url: " + para);
+						//console.log("[ContentExtractort] remove short paragragh which contains url: " + para);
 						rmv_list.push(paragraph);
 						i += 1;
 						continue;
@@ -563,7 +588,7 @@ var NewsProcessor = Processor.extend({
 			}
 			if (i == real_len - 1){
 				if (para.endswith(":") || para.endswith("\uff1a")){
-					console.log("[ContentExtractort] remove last paragraph end with a colon: " + para);
+					//console.log("[ContentExtractort] remove last paragraph end with a colon: " + para);
 					rmv_list.push(paragraph);
 					i += 1;
 					continue;
@@ -603,12 +628,12 @@ var NewsProcessor = Processor.extend({
 		var reg = this._img_placeholder_re;
 		while (found = reg.exec(paragraph)){
 			matches.push(found[0]);
-			console.log("got image: " + found[0]);
+			//console.log("got image: " + found[0]);
 			reg.lastIndex = found.index + 1;
 		}
 		var new_para = "";
 		for (var i=0; i < paras.length; i++){
-			console.log("process paragraph: " + paras[i]);
+			//console.log("process paragraph: " + paras[i]);
 			if (paras[i].length > 0){
 				new_para += "<p>" + paras[i] + "</p>";
 			}
@@ -643,33 +668,33 @@ var NewsProcessor = Processor.extend({
 		var clone = $(node).clone();
 		// extract images from content node
 		var pictures = ImageExtractor.extract_images(clone);
-		console.log("got " + pictures.length + " images from content node");
+		//console.log("got " + pictures.length + " images from content node");
 		for (var i=0; i < pictures.length; i++){
 			$(pictures[i].node).replaceWith("(dolphinimagestart--" + pictures[i].id + "--dolphinimageend)");
 		}
-		console.log(clone.html());
+		//console.log(clone.html());
 
 		var tags = ["p", "div", "span", "ul", "table", "select"];
 		var elements = $(clone).xpath(".//p | .//div | .//span | .//ul | .//table | .//select").toArray();
 		this._remove_unlikely_elem(elements);
 		var content = this._get_content(clone);
-		console.log(content);
+		//console.log(content);
 		var chinese = this._args.chineseRe.exec(content) != null;
 		var min_length = chinese ? 40 : 20;
 		var content_list = this._remove_unlikely_paragraph(content.split("\n"), min_length);
 		content = content_list.join("\n\n");
-		console.log(content);
+		//console.log(content);
 		// remove unlikely keyword
 		content = this._remove_unlikely_keyword(content);
-		console.log(content);
+		//console.log(content);
 		// remove extra paragraph
 		content = content.replace(this._args.paragraphRe, "\n\n");
-		console.log(content);
+		//console.log(content);
 		// wrap content with html tags
 		content = this._wrap_content(content);
 		// replace images in content
 		content = this._replace_images(content, pictures);
-		console.log(content);
+		//console.log(content);
 		return content;
 	},
 

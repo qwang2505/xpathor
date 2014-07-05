@@ -562,6 +562,9 @@ var XpathEvaluator = {
     // attr ---> /@attr 
     // full text ---> /text_content()
     fill_xpath: function(ori, type, attr){
+        if (ori == "NOT_SET"){
+            return "";
+        }
         if (type == "text"){
             ori += "/text()";
         } else if (type == "full_text"){
@@ -576,7 +579,7 @@ var XpathEvaluator = {
 
     // extract result by xpath
     evaluate: function(context, xpath){
-        if (xpath == NOT_SET){
+        if (xpath == NOT_SET || xpath.length == 0){
             return null;
         }
         if (this._is_text(xpath)){

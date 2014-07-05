@@ -1,6 +1,7 @@
 var TemplateManager = {
 
 	template: null,
+	type: null,
 	changed: false,
 
 
@@ -42,11 +43,19 @@ var TemplateManager = {
 	set_template: function(template, loaded){
 		// validate portal template, if id not exists, generate one
 		this.template = template;
+		this.type = "portal";
 		// if loaded template has no id, generate one used in xpathor, and delete id
 		// while updating.
 		if (template.type == "portal" && !this._validate_block_id(true)){
 			alert("loaded template invalid, some block has no id");
 			return;
+		}
+	},
+	set_news_template: function(templates, is_new){
+		this.template = templates;
+		this.type = "news";
+		if (is_new){
+			this.changed = true;
 		}
 	},
 	delete_block: function(block_id){

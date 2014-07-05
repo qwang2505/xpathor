@@ -34,6 +34,11 @@ var ExtractResult = Class.extend({
 	pubDate: null,
 	source: null,
 	nextPage: null,
+
+	valid: function(){
+		// whether this extract result is valid
+		return this.title != null && this.content != null;
+	},
 });
 
 /*

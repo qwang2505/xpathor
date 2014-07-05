@@ -6,16 +6,36 @@ function load_template(url){
     $.get("http://" + SERVER + "/admin/template/api/get?lc=zh-cn&type=portal&key=" + url, function(data){
         if (data['data'].length == 0){
             // new site, show extract links button
-            $("#extract_link_btn").toggleClass("hide");
+            $("#extract_link_btn").removeClass("hide");
             return;
         }
         var template = data['data'][0];
         // show preview and append blocks button
-        $("#preview_blocks_btn").toggleClass("hide");
-        $("#add_blocks_btn").toggleClass("hide");
+        $("#preview_blocks_btn").removeClass("hide");
+        $("#add_blocks_btn").removeClass("hide");
         // send message to content scripts to pass the template
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-            chrome.tabs.sendMessage(tabs[0].id, {name: "set_template", template: template, url: tabs[0].url}, function(responsel){
+            chrome.tabs.sendMessage(tabs[0].id, {name: "set_template", template: template, url: tabs[0].url, type: "portal"}, function(responsel){
+                console.log("[Popup] set template to content scripts succeed");
+            });
+        });
+    });
+}
+function load_detail_template(url){
+    // load template in popup scripts
+    var domain = url.split("/")[2];
+    $.get("http://" + SERVER + "/admin/template/api/get?lc=zh-cn&type=news&key=" + domain, function(data){
+        if (data['data'].length == 0){
+            // new site, show extract links button
+            $("#extract_news_btn").removeClass("hide");
+            return;
+        }
+        var templates = data['data'];
+        // show preview and append blocks button
+        $("#preview_detail_btn").removeClass("hide");
+        // send message to content scripts to pass the template
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+            chrome.tabs.sendMessage(tabs[0].id, {name: "set_template", template: templates, url: tabs[0].url, type: "news"}, function(responsel){
                 console.log("[Popup] set template to content scripts succeed");
             });
         });
@@ -73,6 +93,20 @@ function extract_news() {
             window.close();
         });
     });
+}
+function preview_detail(){
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+        chrome.tabs.sendMessage(tabs[0].id, {name: "preview_news", url: tabs[0].url}, function(response) {
+            console.log("[Popup] Response from extract_news: " + response.success);
+            window.close();
+        });
+    });
+}
+function edit_detail(){
+
+}
+function save_detail_template(){
+
 }
 
 function extract_links() {
@@ -143,19 +177,8 @@ function add_blocks(){
     });
 }
 
-
-document.addEventListener('DOMContentLoaded', function () {
-	document.getElementById("extract_news_btn").addEventListener('click', extract_news);
-	document.getElementById("extract_link_btn").addEventListener('click', extract_links);
-	document.getElementById("login_btn").addEventListener('click', login); 
-    document.getElementById("preview_blocks_btn").addEventListener('click', preview_blocks); 
-    document.getElementById("save_template_btn").addEventListener('click', save_template); 
-    document.getElementById("add_blocks_btn").addEventListener('click', add_blocks); 
-
-
-    // just for test
-    //$("#extract_link_btn").toggleClass("hide");
-
+// do this when portal tab is show
+function init_portal_tab(){
     // first, send message to content scripts to check whether the template exists.
     // if exists, use existed templates, otherwise load template in popup and pass
     // back to content script, in content script will save into local storage.
@@ -167,24 +190,136 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(response);
             var template = response.template;
             if (template != null || template != undefined){
-                if (template.type == "portal"){
-                    $("#preview_blocks_btn").toggleClass("hide");
-                    $("#add_blocks_btn").toggleClass("hide");
+                if (response.type == "portal"){
+                    $("#preview_blocks_btn").removeClass("hide");
+                    $("#add_blocks_btn").removeClass("hide");
                     if (response.previewing){
                         $("#preview_blocks_btn").html("Stop Preview");
                     }
-                } else if (template.type == "news"){
-
                 } else {
-                    console.log("[Popup] unknow template type: " + template.type);
+                    console.log("[Popup] unknow template type: " + response.type);
                 }
                 if (response.changed){
-                    $("#save_template_btn").toggleClass("hide");
+                    $("#save_template_btn").removeClass("hide");
                 }
             } else {
                 // template not loaded, popup handle template loading.
                 load_template(url);
             }
+        });
+    });
+}
+
+// do this when news detail tab is show
+function init_detail_tab(){
+    // first, send message to content scripts to check whether the template exists.
+    // if exists, use existed templates, otherwise load template in popup and pass
+    // back to content script, in content script will save into local storage.
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+        var url = tabs[0].url;
+        // send messsage to content script to check whether template exists
+        chrome.tabs.sendMessage(tabs[0].id, {name: "template_exists", url: url}, function(response) {
+            console.log("[Popup] Response from template_exists: ");
+            console.log(response);
+            var template = response.template;
+            var type = response.type;
+            if (template != null || template != undefined){
+                if (type == "news"){
+                    $("#preview_detail_btn").removeClass("hide");
+                    $("#edit_detail_btn").removeClass("hide");
+                    if (response.previewing){
+                        $("#preview_detail_btn").html("Stop Preview");
+                    }
+                } else {
+                    console.log("[Popup] unknow template type: " + type);
+                }
+                if (response.changed){
+                    $("#save_detail_template_btn").removeClass("hide");
+                }
+            } else {
+                // template not loaded, popup handle template loading.
+                load_detail_template(url);
+            }
+        });
+    });
+}
+
+function init_tab(){
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+        var url = tabs[0].url;
+        chrome.tabs.sendMessage(tabs[0].id, {name: "get_content_type", url: url}, function(response) {
+            var type = response.content_type;
+            console.log(type);
+            if (type != null && type != undefined){
+                // show tab
+                if (type == "news"){
+                    $("#news_detail_tab").addClass("selected");
+                    $("#news_detail_tab_buttons").addClass("show");
+                    init_detail_tab();
+                } else if (type == "portal"){
+                    $("#portal_link_tab").addClass("selected");
+                    $("#portal_link_tab_buttons").addClass("show");
+                    init_portal_tab();
+                } else {
+                    console.log("unknow content type: " + type);
+                }
+            } else {
+                // show news detail tab
+                $("#news_detail_tab").addClass("selected");
+                $("#news_detail_tab_buttons").addClass("show");
+                init_detail_tab();
+            }
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // news detail buttons
+	document.getElementById("extract_news_btn").addEventListener('click', extract_news);
+    document.getElementById("preview_detail_btn").addEventListener('click', preview_detail); 
+    document.getElementById("edit_detail_btn").addEventListener('click', edit_detail); 
+    document.getElementById("save_detail_template_btn").addEventListener('click', save_detail_template); 
+    // portal link buttons
+	document.getElementById("extract_link_btn").addEventListener('click', extract_links);
+    document.getElementById("preview_blocks_btn").addEventListener('click', preview_blocks); 
+    document.getElementById("save_template_btn").addEventListener('click', save_template); 
+    document.getElementById("add_blocks_btn").addEventListener('click', add_blocks); 
+    // extra buttons
+    document.getElementById("login_btn").addEventListener('click', login); 
+
+    // default all tab content should not show, send message to content script
+    // to get content type, if can not get, show the first one.
+    init_tab();
+
+    $(".tab").each(function(){
+        $(this).click(function(){
+            if ($(this).hasClass("selected")){
+                // already selected, do nothing
+                return;
+            }
+            $(".tab.selected").removeClass("selected");
+            $(this).addClass("selected");
+            $(".tab-content").each(function(){
+                $(this).removeClass("show");
+            });
+            var id = $(this).attr("id");
+            var type = null;
+            $("#" + id + "_buttons").addClass("show");
+            if (id == "portal_link_tab"){
+                init_portal_tab();
+                type = "portal";
+            } else if (id == "news_detail_tab"){
+                init_detail_tab();
+                type = "news";
+            } else {
+                console.log("error happend, unknow tab clicked");
+            }
+            // send message to set content type to content script, so when open 
+            // again can get from content script and set directly.
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+                var url = tabs[0].url;
+                chrome.tabs.sendMessage(tabs[0].id, {name: "set_content_type", url: url, content_type: type});
+            });
         });
     });
 });

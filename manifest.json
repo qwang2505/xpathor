@@ -28,5 +28,5 @@
         "persistent": false
     },
     "permissions": ["storage", "clipboardRead", "clipboardWrite", "tabs"],
-    "web_accessible_resources": ["preview_background.png", "jquery.js"]
+    "web_accessible_resources": ["preview_background.png", "jquery-2.0.3.min.map", "jquery.js"]
 }

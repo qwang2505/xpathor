@@ -1,6 +1,7 @@
 
 // global processors to reuse
 var _processors = {};
+var _content_type = null;
 
 // $(window).on('beforeunload', function() {
 //     if (XpathorStorage.unsave){
@@ -35,7 +36,7 @@ chrome.runtime.onMessage.addListener(
 				processor = new NewsProcessor();
 				_processors["news_processor"] = processor;
         	}
-        	processor.preview();
+        	processor.preview(TemplateManager.template);
 			console.log("Preview news in main.js");
         } else if (request.name == "extract_links"){
             if ("portal_processor" in _processors){
@@ -88,6 +89,7 @@ chrome.runtime.onMessage.addListener(
             // whether template already exists, called by popup
             var response = {success: true};
             response.template = TemplateManager.template;
+            response.type = TemplateManager.type;
             response.previewing = $("div[class='xpathor-preview-block'][used='true']").length > 0;
             response.changed = TemplateManager.changed;
             sendResponse(response);
@@ -101,10 +103,20 @@ chrome.runtime.onMessage.addListener(
         } else if (request.name == "set_template"){
             // set template value, called by popup
             var template = request.template;
-            if (template != null && template != undefined){
+            var type = request.type;
+            if (type == "portal" && template != null && template != undefined){
                 TemplateManager.set_template(template, true);
+            } else if (type == "news" && template.length > 0){
+                TemplateManager.set_news_template(template);
             }
             sendResponse({success: true});
+            return;
+        } else if (request.name == "set_content_type"){
+            _content_type = request.content_type;
+        } else if (request.name == "get_content_type"){
+            response = {success: true};
+            response.content_type = _content_type;
+            sendResponse(response);
             return;
         } else {
             console.log("Unknow request: " + request.name);
