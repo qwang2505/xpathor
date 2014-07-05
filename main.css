@@ -254,25 +254,36 @@ a.xpathor-boxclose{
 	visibility: hidden;
 	transition: opacity 1s, visibility 1s;
 	box-shadow: 5px 5px 2px #aaaaaa;
-	font-size: 1em;
-	font-family: 'simsun';
-	color: black;
-	line-height: 20px;
+	font-size: 12px !important;
+	font-family: 'simsun' !important;
+	color: black !important;
+	line-height: 20px !important;
+	direction: ltr;
+	text-indent: 0px !important;
 }
 .xpathor-dialog.xpathor-dialog-show {
-	visibility: visible;
-	opacity: 1;
+	visibility: visible !important;
+	opacity: 1 !important;
 }
 
 .xpathor-dialog-select {
-	width: 200px;
+	width: 200px !important;
+	background: white !important;
+	padding: 0px !important;
+	margin: 0px !important;
 }
 
 .xpathor-selection-block {
-	width: 90%;
+	width: 90% !important;
+	font-size: 12px !important;
+	font-family: 'simsun' !important;
 }
 .xpathor-selection-block input{
-	width: 196px;
+	width: 196px !important;
+	height: 20px !important;
+	background: white !important;
+	padding: 0px !important;
+	margin: 0px !important;
 }
 .xpathor-selection-block.xpathor-category:before {
 	content: "Category";
@@ -289,7 +300,7 @@ a.xpathor-boxclose{
 	padding-right: 40px;
 }
 
-.xpathor-selection-block.block:before {
+.xpathor-selection-block.xpathor-block:before {
 	content: "Block Xpath";
 	padding-right: 94px;
 }
@@ -306,14 +317,17 @@ a.xpathor-boxclose{
 
 .xpathor-selection-buttons {
 	margin-top: 20px;
+	background: transparent !important;
 }
 
 .xpathor-dialog-button {
 	width: 80px;
 	height: 30px;
-	background-color: #eeeeee;
-	border-radius: 5px;
-	cursor: pointer;
+	color: black !important;
+	background-color: #eeeeee !important;
+	border-radius: 5px !important;
+	cursor: pointer !important;
+	text-align: center !important;
 }
 
 .xpathor-dialog-button.confirm {
