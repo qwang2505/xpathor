@@ -12,8 +12,8 @@ chrome.extension.onMessage.addListener(function (msg, sender, sendResponse) {
 chrome.runtime.onMessageExternal.addListener(
   function(request, sender, sendResponse) {
     if (request.name == "preview_block"){
-        var templateAPI = "http://10.2.8.221/admin/template/api/get?lc=zh-cn&type=portal&key=";
-        $.get(templateAPI + request.message['url'], function(data){
+        var api_path = Api.get_path("get") + "?lc=" + Api.get_locale() + "&type=portal&key=" + request.message["url"];
+        $.get(api_path, function(data){
             var message = {};
             if (data == undefined) {
                 alert("dont has this template");

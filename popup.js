@@ -1,9 +1,8 @@
-var SERVER = "10.2.8.221";
-var LOCALE = "zh-cn";
 
 function load_template(url){
     // load template in popup scripts
-    $.get("http://" + SERVER + "/admin/template/api/get?lc=zh-cn&type=portal&key=" + url, function(data){
+    var api_path = Api.get_path("get") + "?lc=" + Api.get_locale() + "&type=portal&key=" + url;
+    $.get(api_path, function(data){
         if (data['data'].length == 0){
             // new site, show extract links button
             $("#extract_link_btn").removeClass("hide");
@@ -24,7 +23,8 @@ function load_template(url){
 function load_detail_template(url){
     // load template in popup scripts
     var domain = url.split("/")[2];
-    $.get("http://" + SERVER + "/admin/template/api/get?lc=zh-cn&type=news&key=" + domain, function(data){
+    var api_path = Api.get_path("get") + "?lc=" + get_locale() + "&type=news&key=" + domain;
+    $.get(api_path, function(data){
         if (data['data'].length == 0){
             // new site, show extract links button
             $("#extract_news_btn").removeClass("hide");
@@ -52,7 +52,9 @@ function add_template(template){
         }
     }
     // call api to add new template
-    $.post("http://" + SERVER + "/admin/template/api/add", {lc: LOCALE, type: template.type, template: JSON.stringify(template)}, function(resp){
+    var api_path = Api.get_path("add");
+    var locale = Api.get_locale();
+    $.post(api_path, {lc: locale, type: template.type, template: JSON.stringify(template)}, function(resp){
         console.log(resp);
         // TODO get object id from response, and send to content script for later update.
         window.close();
@@ -76,7 +78,9 @@ function update_template(template){
         return;
     }
     delete template._id;
-    $.post("http://" + SERVER + "/admin/template/api/update", {lc: LOCALE, type: template.type, oid: oid, template: JSON.stringify(template)}, function(resp){
+    var api_path = Api.get_path("update");
+    var locale = Api.get_locale();
+    $.post(api_path, {lc: locale, type: template.type, oid: oid, template: JSON.stringify(template)}, function(resp){
         console.log(resp);
         window.close();
     }).fail(function(){

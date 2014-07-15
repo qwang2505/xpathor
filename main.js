@@ -19,6 +19,11 @@ chrome.runtime.onMessage.addListener(
                 return;
             }
         }
+        if (request.message.url != null && request.message.url != undefined && request.message.url != window.location.href){
+            return;
+        }
+        console.log("got message in " + window.location.href);
+        console.log(request);
         var processor;
         if (request.name == "extract_news"){
         	if ("news_processor" in _processors){
@@ -47,7 +52,7 @@ chrome.runtime.onMessage.addListener(
             }
             processor.start();
 			console.log("Extract links from portal in main.js");
-        } else if (request.name == "preview_block" && request.message.url == document.location.href){
+        } else if (request.name == "preview_block" && request.message.url == window.location.href){
             if ("portal_processor" in _processors){
                 processor = _processors["portal_processor"];
             } else {
