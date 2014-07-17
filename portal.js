@@ -378,7 +378,8 @@ var PortalProcessor = Processor.extend({
 			"<div class='xpathor-preview-buttons'><span class='xpathor-preview-edit'" + 
 			" xpathor_block_id=\"" + block_id + "\">Edit</span>" + "<span class='xpathor-preview-delete' " + 
 			" xpathor_block_id=\"" + block_id + "\">Delete</span><span class='xpathor-preview-hide' " + 
-			">Hide</span></div>" + "<div class='xpathor-preview-category'></div></div>");
+			">Hide</span><span class='xpathor-preview-newslist-btn'>NewsList</span></div>" + 
+			"<div class='xpathor-preview-category'></div><div class='xpathor-preview-newslist'></div></div>");
 		var elems = $("div[class='xpathor-preview-block'][used='false']");
 		if (elems.length > 0){
 			var elem = elems[0];
@@ -393,6 +394,7 @@ var PortalProcessor = Processor.extend({
 
 	// preview extracting result
 	_preview: function(results, obj){
+		console.log(results);
 		// generating html code by result
 		for (var i=0; i < results.length; i++){
 			// use div to cover preview area, but need to show priority of news in the middel of news.
@@ -400,18 +402,36 @@ var PortalProcessor = Processor.extend({
 				// if no news, should preview the block at least.
 				//continue;
 			}
+			// construct newslist html
+			var newslist_html = "<table><tr><td class='xpathor-preview-newslist-priority'><strong>Priority</strong></td><td><strong>Title</strong></td></tr>";
 			for (var j=0; j < results[i].newslist.length; j++){
-				$(results[i].newslist[j].elem).attr("xpathor_priority", this._priority_map[results[i].newslist[j].status] || "P2");
+				var p = this._priority_map[results[i].newslist[j].status] || "P2";
+				$(results[i].newslist[j].elem).attr("xpathor_priority", p);
 				$(results[i].newslist[j].elem).addClass("xpathor-preview-news");
+				// TODO add news into newslist preview div
+				var title = results[i].newslist[j].title;
+				if (title == null || title == undefined || title.length == 0){
+					// TODO solve relative link
+					title = results[i].newslist[j].url;
+				}
+				newslist_html += "<tr><td class='xpathor-preview-newslist-priority'>" + p + "</td><td width='88%'><a target='_blank' href='" + results[i].newslist[j].url + "'>" + 
+									title + "</a></td></tr>";
 			}
+			newslist_html += "</table>";
 			var block = results[i].block;
 			// TODO need to record template id for later management, like delete, edit, etc.
 			var preview_block = this._get_preview_block_div(results[i].blockId);
 			var p = $(block).offset();
 			var width = $(block).width();
 			var height = $(block).outerHeight();
+			// set preview position
 			$(preview_block).css({left: p.left, top: p.top - 24, width: width, height: height + 24});
+			// set to used to avoid using by other preview block.
 			$(preview_block).attr("used", "true");
+			// set newslist html
+			$(".xpathor-preview-newslist", $(preview_block)).html(newslist_html);
+			$("table", $(preview_block)).css({width: width - 50});
+			$(".xpathor-preview-newslist-priority", $(preview_block)).css({width: (width - 50) * 0.1});
 			// set extra attr on preview block to get later
 			$(block).attr("xpathor_preview_block_id", results[i].blockId);
 			// update cateogry
@@ -446,7 +466,10 @@ var PortalProcessor = Processor.extend({
 				obj._create_edit_dialog(bid, obj);
 				console.log("create dialog finished");
 				$("#xpathor_edit_dialog").toggleClass("xpathor-dialog-show");
-				cosole.log("show dialog");
+				console.log("show dialog");
+			});
+			$(".xpathor-preview-newslist-btn", $(preview_block)).click(function(){
+				$(".xpathor-preview-newslist", $(this).parent().parent()).toggleClass("xpathor-preview-newslist-show");
 			});
 		}
 	},

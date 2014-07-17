@@ -382,3 +382,29 @@ a.xpathor-boxclose{
 	cursor: pointer;
 	background: rgba(230, 230, 230, 1.0);
 }
+
+.xpathor-preview-newslist {
+	position: absolute;
+	background: rgba(230, 230, 230, 1.0);
+	padding: 10px;
+	margin-top: 12px;
+	margin-left: 10px;
+	top: 24px;
+	display: none;
+}
+
+.xpathor-preview-newslist.xpathor-preview-newslist-show {
+	display: block;
+}
+
+.xpathor-preview-newslist table{
+	border: 1px solid black;
+	table-layout: fixed;
+}
+
+.xpathor-preview-newslist td{
+	border: 1px solid black;
+	padding: 5px;
+	table-layout: fixed;
+	overflow-x: hidden;
+}
