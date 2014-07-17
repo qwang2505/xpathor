@@ -19,7 +19,8 @@ chrome.runtime.onMessage.addListener(
                 return;
             }
         }
-        if (request.message.url != null && request.message.url != undefined && request.message.url != window.location.href){
+        if (request.message != null && request.message != undefined && request.message.url != null 
+            && request.message.url != undefined && request.message.url != window.location.href){
             return;
         }
         console.log("got message in " + window.location.href);

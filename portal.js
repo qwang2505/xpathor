@@ -397,7 +397,8 @@ var PortalProcessor = Processor.extend({
 		for (var i=0; i < results.length; i++){
 			// use div to cover preview area, but need to show priority of news in the middel of news.
 			if (results[i].newslist.length == 0){
-				continue;
+				// if no news, should preview the block at least.
+				//continue;
 			}
 			for (var j=0; j < results[i].newslist.length; j++){
 				$(results[i].newslist[j].elem).attr("xpathor_priority", this._priority_map[results[i].newslist[j].status] || "P2");
@@ -615,8 +616,6 @@ var PortalProcessor = Processor.extend({
         				return false;
         			}
         			var child = message.block_paths.pop();
-        			console.log(child);
-        			console.log(message.block_paths.length);
         			var elem =  $(".xpathor-selection")[0];
         			$(elem).removeClass("xpathor-selection");
         			$(child).addClass("xpathor-selection");

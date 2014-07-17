@@ -347,11 +347,37 @@ var BlockXpathGenerator = XpathGenerator.extend({
         return false;
     },
 
+    /*
+     * Check and find link in the selected element.
+     */
+    _find_link_element: function(element, block){
+        // check if there's link in selected element.
+        if (element.tagName == "A"){
+            return element;
+        }
+        var links = XpathEvaluator.evaluate(element, ".//a");
+        if (links.length > 0){
+            return element;
+        }
+        // no link in selected element, go up to find link in parent.
+        var parent = element.parentNode;
+        while (parent != block){
+            if (parent.tagName == "A"){
+                return parent;
+            }
+            parent = parent.parentNode;
+        }
+        // if still can not find link, I do not know how to handle either.
+        // temporary just return selected element;
+        // TODO maybe should check parent siblings?
+        return element;
+    },
+
+    /*
+     * Get news xpath within the block, headline indicate whether for headline or not.
+     */
     get_news_xpath: function(element, block, headline){
-        console.log("element");
-        console.log(element);
-        console.log("block");
-        console.log(block);
+        element = this._find_link_element(element, block);
         if (element.tagName == "A"){
             if (element.parentNode == block){
                 // direct a in block
@@ -496,6 +522,9 @@ var BlockXpathGenerator = XpathGenerator.extend({
      * Get headline xpath, need to pass in news item and news xpath to compare
      */
     get_headline_xpath: function(element, block, news_item, news_item_xpath){
+        // first, check if links exists in selected element, if not, go up and check parent or find links
+        // from parent siblings.
+        element = this._find_link_element(element, block);
         // get xpath with get_news_xpath. If get different xpath with news_item_xpath, use it.
         // remember, in get_news_xpath, just use tagName in xpath, no class or id or other attribute.
         if (news_item_xpath.length > 0 && news_item_xpath != "NOT_SET"){
