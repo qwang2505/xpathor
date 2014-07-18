@@ -60,10 +60,19 @@ chrome.runtime.onMessage.addListener(
                 processor = new PortalProcessor();
                 _processors["portal_processor"] = processor;
             }
-            var template = request.message.template;
-            var block_id = request.message.blockID;
-            processor.preview_block(template, block_id);
-            console.log("preview block from portal in main.js");
+            var response = {success: false};
+            try {
+                var template = request.message.template;
+                var block_id = request.message.blockID;
+                processor.preview_block(template, block_id);
+                response.success = true;
+                console.log("preview block from portal in main.js");
+            } catch (err){
+                console.log("error while preview block: " + err);
+            } finally {
+                sendResponse(response);
+                return;
+            }
         } else if (request.name == "preview_blocks"){
             if ("portal_processor" in _processors){
                 processor = _processors["portal_processor"];

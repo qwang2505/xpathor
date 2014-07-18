@@ -628,7 +628,7 @@ var XpathEvaluator = {
     },
 
     _is_text: function(xpath){
-        return xpath.indexOf("/text()") == (xpath.length - "/text()".length);
+        return xpath.indexOf("/text()") != -1 && xpath.indexOf("/text()") == (xpath.length - "/text()".length);
     },
 
     // extract text result by xpath

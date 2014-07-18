@@ -25,10 +25,11 @@ chrome.runtime.onMessageExternal.addListener(
             message['blockID'] = request.message['block'][0];
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 chrome.tabs.sendMessage(tabs[0].id, {name: "preview_block", message: message}, function(response) {
-                    console.log("Response from main: " + response.success);
+                    console.log("Response from main: ");
+                    console.log(response);
                 });
             });
         });
     }
-    sendResponse("success");
+    sendResponse({success: true});
 });

@@ -403,7 +403,7 @@ var PortalProcessor = Processor.extend({
 				//continue;
 			}
 			// construct newslist html
-			var newslist_html = "<table><tr><td class='xpathor-preview-newslist-priority'><strong>Priority</strong></td><td><strong>Title</strong></td></tr>";
+			var newslist_html = "<table cellspacing='0'><tr><td class='xpathor-preview-newslist-priority'><strong>Priority</strong></td><td><strong>Title</strong></td></tr>";
 			for (var j=0; j < results[i].newslist.length; j++){
 				var p = this._priority_map[results[i].newslist[j].status] || "P2";
 				$(results[i].newslist[j].elem).attr("xpathor_priority", p);
