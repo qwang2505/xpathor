@@ -92,13 +92,18 @@ chrome.runtime.onMessage.addListener(
             $(".xpathor-preview-block").each(function(){
                 var pre_block = $(this);
                 var block_id = $(pre_block).attr("xpathor_block_id");
-                $(pre_block).css({left: 0, top: 0, width: 0, height: 0});
+                $(pre_block).css({left: 0, top: 0, width: 0, height: 0, display: "none"});
                 $(pre_block).attr("used", "false");
                 $(pre_block).attr("xpathor_block_id", "");
                 $(".xpathor-preview-news", $("*[xpathor_preview_block_id=\"" + block_id + "\"]")).each(function(){
                     $(this).removeClass("xpathor-preview-news");
                 });
                 $("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
+                // remove button listeners
+                $(".xpathor-preview-hide", $(pre_block)).unbind("click");
+                $(".xpathor-preview-delete", $(pre_block)).unbind("click");
+                $(".xpathor-preview-edit", $(pre_block)).unbind("click");
+                $(".xpathor-preview-newslist-btn", $(pre_block)).unbind("click");
             });
         } else if (request.name == "template_exists"){
             // whether template already exists, called by popup

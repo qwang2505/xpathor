@@ -425,7 +425,7 @@ var PortalProcessor = Processor.extend({
 			var width = $(block).width();
 			var height = $(block).outerHeight();
 			// set preview position
-			$(preview_block).css({left: p.left, top: p.top - 24, width: width, height: height + 24});
+			$(preview_block).css({left: p.left, top: p.top - 24, width: width, height: height + 24, display: "block"});
 			// set to used to avoid using by other preview block.
 			$(preview_block).attr("used", "true");
 			// set newslist html
@@ -439,18 +439,23 @@ var PortalProcessor = Processor.extend({
 			$(".xpathor-preview-hide", $(preview_block)).click(function(){
 				var block_id = $(this).attr("xpathor_block_id");
 				var pre_block = $(this).parent().parent();
-				$(pre_block).css({left: 0, top: 0, width: 0, height: 0});
+				$(pre_block).css({left: 0, top: 0, width: 0, height: 0, display: "none"});
 				$(pre_block).attr("used", "false");
 				$(pre_block).attr("xpathor_block_id", "");
 				$(".xpathor-preview-news", $("*[xpathor_preview_block_id=\"" + block_id + "\"]")).each(function(){
 					$(this).removeClass("xpathor-preview-news");
 				});
 				$("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
+				// remove button listeners
+				$(".xpathor-preview-hide", $(pre_block)).unbind("click");
+				$(".xpathor-preview-delete", $(pre_block)).unbind("click");
+				$(".xpathor-preview-edit", $(pre_block)).unbind("click");
+				$(".xpathor-preview-newslist-btn", $(pre_block)).unbind("click");
 			});
 			$(".xpathor-preview-delete", $(preview_block)).click(function(){
 				var block_id = $(this).attr("xpathor_block_id");
 				var pre_block = $(this).parent().parent();
-				$(pre_block).css({left: 0, top: 0, width: 0, height: 0});
+				$(pre_block).css({left: 0, top: 0, width: 0, height: 0, display: "none"});
 				$(pre_block).attr("used", "false");
 				$(pre_block).attr("xpathor_block_id", "");
 				$(".xpathor-preview-news", $("*[xpathor_preview_block_id=\"" + block_id + "\"]")).each(function(){
@@ -458,15 +463,17 @@ var PortalProcessor = Processor.extend({
 				});
 				$("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
 				TemplateManager.delete_block(block_id);
+				// remove button listeners
+				$(".xpathor-preview-hide", $(pre_block)).unbind("click");
+				$(".xpathor-preview-delete", $(pre_block)).unbind("click");
+				$(".xpathor-preview-edit", $(pre_block)).unbind("click");
+				$(".xpathor-preview-newslist-btn", $(pre_block)).unbind("click");
 			});
 			$(".xpathor-preview-edit", $(preview_block)).click(function(){
 				console.log("edit click");
 				var bid = $(this).attr("xpathor_block_id");
-				console.log(bid);
 				obj._create_edit_dialog(bid, obj);
-				console.log("create dialog finished");
 				$("#xpathor_edit_dialog").toggleClass("xpathor-dialog-show");
-				console.log("show dialog");
 			});
 			$(".xpathor-preview-newslist-btn", $(preview_block)).click(function(){
 				$(".xpathor-preview-newslist", $(this).parent().parent()).toggleClass("xpathor-preview-newslist-show");
@@ -537,12 +544,17 @@ var PortalProcessor = Processor.extend({
 		// refresh preview result of block 
 		// first, stop preview block
 		var pre_block = $("div[class='xpathor-preview-block'][xpathor_block_id='" + block_id + "']")[0];
-        $(pre_block).css({left: 0, top: 0, width: 0, height: 0});
+        $(pre_block).css({left: 0, top: 0, width: 0, height: 0, display: "none"});
         $(pre_block).attr("used", "false");
         $(pre_block).attr("xpathor_block_id", "");
         $(".xpathor-preview-news", $("*[xpathor_preview_block_id=\"" + block_id + "\"]")).each(function(){
             $(this).removeClass("xpathor-preview-news");
         });
+        // remove button listeners
+        $(".xpathor-preview-hide", $(pre_block)).unbind("click");
+		$(".xpathor-preview-delete", $(pre_block)).unbind("click");
+		$(".xpathor-preview-edit", $(pre_block)).unbind("click");
+		$(".xpathor-preview-newslist-btn", $(pre_block)).unbind("click");
         $("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
         // then, preview by new template
         var template = TemplateManager.get_block(block_id);
