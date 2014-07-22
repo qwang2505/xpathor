@@ -12,6 +12,8 @@ var PortalProcessor = Processor.extend({
 	_preview_elem: null,
 	_dialog_elem: null,
 
+	_title_length_threshold: 5,
+
 	_category_map: {
 		1: "Important News",
 		2: "International",
@@ -256,6 +258,9 @@ var PortalProcessor = Processor.extend({
 					continue;
 				}
 				item.title = $(headlines[j]).text().trim();
+				if (item.title.length != 0 && item.title.length < this._title_length_threshold){
+					continue;
+				}
 				item.category = template.category;
 				item.status = template.headline_status;
 				item.elem = headlines[j];
@@ -275,6 +280,9 @@ var PortalProcessor = Processor.extend({
 					continue;
 				}
 				item.title = $(news[j]).text().trim();
+				if (item.title.length != 0 && item.title.length < this._title_length_threshold){
+					continue;
+				}
 				item.category = template.category;
 				item.status = template.status;
 				item.elem = news[j];

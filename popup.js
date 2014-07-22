@@ -59,7 +59,7 @@ function add_template(template){
         // TODO get object id from response, and send to content script for later update.
         window.close();
     }).fail(function(){
-        alert("error on update template, please contact the developer");
+        alert("error on add template, please contact the developer");
     });
 }
 function update_template(template){
