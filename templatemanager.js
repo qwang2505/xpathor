@@ -92,6 +92,7 @@ var TemplateManager = {
 				new: true,
 				blocks: [],
 			};
+			this.type = "portal";
 		}
 		for (var i=0; i < blocks.length; i++){
 			this.template.blocks.push(blocks[i]);
