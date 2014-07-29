@@ -2,6 +2,7 @@ var TemplateManager = {
 
 	template: null,
 	type: null,
+	newslist: {},
 	changed: false,
 
 
@@ -105,6 +106,15 @@ var TemplateManager = {
 			if (this.template.blocks[i].id == block_id){
 				return this.template.blocks[i];
 			}
+		}
+	},
+	// newslist: json, key: blockid, value: newslist
+	save_newslist: function(results){
+		for (var i=0; i < results.length; i++){
+			var bid = results[i].blockId;
+			// TODO temporaray just select first element
+			delete results[i].newslist[0].elem;
+			this.newslist[bid] = [results[i].newslist[0]];
 		}
 	},
 };

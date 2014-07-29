@@ -6,7 +6,7 @@ var Api = {
 	// environments
 	envs: {
 		"china": "dzone.dolphin.com",
-		"china-test": "60.191.57.156:8088",
+		"china-test": "60.191.57.156",
 		"global": "now.dolphin.com",
 		"global-test": "10.2.10.106",
 	},

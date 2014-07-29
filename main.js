@@ -118,6 +118,9 @@ chrome.runtime.onMessage.addListener(
             var response = {success: true};
             if (TemplateManager.changed){
                 response.template = TemplateManager.template;
+                if (TemplateManager.type == 'portal'){
+                    response.newslist = TemplateManager.newslist;
+                }
             }
             sendResponse(response);
         } else if (request.name == "set_template"){

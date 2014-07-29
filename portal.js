@@ -144,9 +144,9 @@ var PortalProcessor = Processor.extend({
 					alert("Please select priority of normal news!");
 					return;
 				}
-				obj.message.data.category = cate;
-				obj.message.data.headline_status = headline_p;
-				obj.message.data.status = normal_p;
+				obj.message.data.category = parseInt(cate);
+				obj.message.data.headline_status = parseInt(headline_p);
+				obj.message.data.status = parseInt(normal_p);
 				// save blocks
 				var block = {};
 				block.block = obj.message.data.block;
@@ -342,6 +342,8 @@ var PortalProcessor = Processor.extend({
 		}
 		// extract result by blocks
 		var extract_result = this._extract(blocks);
+		// TODO save blocck news list
+		TemplateManager.save_newslist(extract_result);
 		console.log(extract_result);
 		// generate html by result
 		this._preview(extract_result, this);

@@ -41,47 +41,58 @@ function load_detail_template(url){
         });
     });
 }
-function add_template(template){
+function add_template(template, response){
     delete template.new;
+    var locale = Api.get_locale();
+    var data = {lc: locale, type: template.type, template: JSON.stringify(template)};
     if (template.type == "portal"){
         // delete id
-        for (var i=0; i < template.blocks.length; i++){
-            if (template.blocks[i].id != null && template.blocks[i].id != undefined && template.blocks[i].id[0] == "B"){
-                delete template.blocks[i].id;
-            }
-        }
+        //for (var i=0; i < template.blocks.length; i++){
+        //    if (template.blocks[i].id != null && template.blocks[i].id != undefined && template.blocks[i].id[0] == "B"){
+        //        delete template.blocks[i].id;
+        //    }
+        //}
+        data['newslist'] = JSON.stringify(response.newslist);
     }
     // call api to add new template
     var api_path = Api.get_path("add");
-    var locale = Api.get_locale();
-    $.post(api_path, {lc: locale, type: template.type, template: JSON.stringify(template)}, function(resp){
+    $.post(api_path, data, function(resp){
         console.log(resp);
         // TODO get object id from response, and send to content script for later update.
+        if (!resp.success){
+            alert("Add failed! " + resp.msg);
+        }
         window.close();
     }).fail(function(){
         alert("error on add template, please contact the developer");
     });
 }
-function update_template(template){
-    if (template.type == "portal"){
-        // delete id
-        for (var i=0; i < template.blocks.length; i++){
-            if (template.blocks[i].id != null && template.blocks[i].id != undefined && template.blocks[i].id[0] == "B"){
-                delete template.blocks[i].id;
-            }
-        }
-    }
-    // call api to update template
+function update_template(template, response){
+    var locale = Api.get_locale();
     var oid = template._id;
     if (oid == null || oid == undefined){
         alert("oid is null while update template!");
         return;
     }
     delete template._id;
+    var data = {lc: locale, type: template.type, oid: oid, template: JSON.stringify(template)};
+    if (template.type == "portal"){
+        // delete id
+        //for (var i=0; i < template.blocks.length; i++){
+        //    if (template.blocks[i].id != null && template.blocks[i].id != undefined && template.blocks[i].id[0] == "B"){
+        //        delete template.blocks[i].id;
+        //    }
+        //}
+        data['newslist'] = JSON.stringify(response.newslist);
+    }
+    // call api to update template
     var api_path = Api.get_path("update");
-    var locale = Api.get_locale();
-    $.post(api_path, {lc: locale, type: template.type, oid: oid, template: JSON.stringify(template)}, function(resp){
+    console.log(data);
+    $.post(api_path, data, function(resp){
         console.log(resp);
+        if (!resp.success){
+            alert("Update failed! " + resp.msg);
+        }
         window.close();
     }).fail(function(){
         // alert error
@@ -163,10 +174,10 @@ function save_template(){
             if (template.new){
                 // add new template
                 console.log("add new template");
-                add_template(template);
+                add_template(template, response);
             } else {
                 console.log("update template");
-                update_template(template);
+                update_template(template, response);
             }
         });
     });
@@ -197,6 +208,7 @@ function init_portal_tab(){
                 if (response.type == "portal"){
                     $("#preview_blocks_btn").removeClass("hide");
                     $("#add_blocks_btn").removeClass("hide");
+                    $("#finish_portal_btn").removeClass("hide");
                     if (response.previewing){
                         $("#preview_blocks_btn").html("Stop Preview");
                     }
@@ -277,6 +289,14 @@ function init_tab(){
     });
 }
 
+function finish_portal(){
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+        //window.location.href = "http://10.2.10.1:8000/report/source/newslist?link=" + window.location.href;
+        window.open("http://10.2.10.1:8000/report/source/newslist?link=" + tabs[0].url);
+        window.close();
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     // news detail buttons
 	document.getElementById("extract_news_btn").addEventListener('click', extract_news);
@@ -288,6 +308,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("preview_blocks_btn").addEventListener('click', preview_blocks); 
     document.getElementById("save_template_btn").addEventListener('click', save_template); 
     document.getElementById("add_blocks_btn").addEventListener('click', add_blocks); 
+    document.getElementById("finish_portal_btn").addEventListener('click', finish_portal); 
     // extra buttons
     document.getElementById("login_btn").addEventListener('click', login); 
 
