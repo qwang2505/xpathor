@@ -108,8 +108,14 @@ chrome.runtime.onMessage.addListener(
         } else if (request.name == "template_exists"){
             // whether template already exists, called by popup
             var response = {success: true};
-            response.template = TemplateManager.template;
-            response.type = TemplateManager.type;
+            var type = request.type;
+            if (type == TemplateManager.type){
+                response.template = TemplateManager.template;
+                response.type = TemplateManager.type;
+            } else {
+                response.template = null;
+                response.type = type;
+            }
             response.previewing = $("div[class='xpathor-preview-block'][used='true']").length > 0;
             response.changed = TemplateManager.changed;
             sendResponse(response);
@@ -117,9 +123,14 @@ chrome.runtime.onMessage.addListener(
         } else if (request.name == "get_template"){
             var response = {success: true};
             if (TemplateManager.changed){
-                response.template = TemplateManager.template;
                 if (TemplateManager.type == 'portal'){
+                    response.template = TemplateManager.template;
                     response.newslist = TemplateManager.newslist;
+                } else if (TemplateManager.type == 'news'){
+                    // TODO here just get first template in templates list
+                    response.template = TemplateManager.template[0];
+                    response.template.new = true;
+                    response.template.type = "news";
                 }
             }
             sendResponse(response);

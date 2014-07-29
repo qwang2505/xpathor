@@ -115,6 +115,8 @@ var NewsProcessor = Processor.extend({
 	_tip_elem: null,
 	_preview_elem: null,
 
+	_top_domains: ["com", "edu", "gov", "int", "mil", "net", "org", "biz", "info", "pro", "name", "museum", "coop", "aero", "idv", "xxx"],
+
 	// arguments when extract text content from dom node, copy from python source
 	_args: {
 		unlikelyRe: /page|seo_text|multicntwrap|title|imageCaption|editorialItem|pageHeader|articleHead|nor_warning|photo-warp|bucket|subscribe|date|time|stories|filedby|mod|contributors|byline|filed-under|social-bar |aboutbox|rightcol|copyright|hide|pr_box|pr_text|share|bookmark|adwrapper|ad_wrapper|combx|cmnt|comment|disqus |foot|header|menu|meta|nav|rss|shoutbox|sidebar|sponsor|relate|newsInfo|crumb|foot|byline|tagline|articleInfo/i,
@@ -254,9 +256,28 @@ var NewsProcessor = Processor.extend({
 		return;
 	},
 
+	get_top_domain: function(){
+		var url = window.location.href;
+		var domain = url.split("://")[1].split("/")[0];
+		var domain_frags = domain.split(".");
+		var top_domain = domain;
+		while (domain_frags.length >= 2){
+			if (domain_frags.length == 2 && this._top_domains.indexOf(domain_frags[0]) != -1){
+				break;
+			}
+			var temp = domain_frags.join(".");
+			if (temp == domain){
+				domain_frags = domain_frags.slice(1);
+				continue;
+			}
+			top_domain = temp;
+			domain_frags = domain_frags.slice(1);
+		}
+		return top_domain;
+	},
+
 	fill_template: function(template){
-		// TODO finish this
-		template.domain = "";
+		template.domain = this.get_top_domain();
 		template.pattern = "";
 		template.title = XpathEvaluator.fill_xpath(template.title, "text");
 		template.source = XpathEvaluator.fill_xpath(template.source, "full_text");

@@ -22,8 +22,7 @@ function load_template(url){
 }
 function load_detail_template(url){
     // load template in popup scripts
-    var domain = url.split("/")[2];
-    var api_path = Api.get_path("get") + "?lc=" + get_locale() + "&type=news&key=" + domain;
+    var api_path = Api.get_path("get") + "?lc=" + Api.get_locale() + "&type=news&key=" + url;
     $.get(api_path, function(data){
         if (data['data'].length == 0){
             // new site, show extract links button
@@ -54,6 +53,7 @@ function add_template(template, response){
         //}
         data['newslist'] = JSON.stringify(response.newslist);
     }
+    console.log(data);
     // call api to add new template
     var api_path = Api.get_path("add");
     $.post(api_path, data, function(resp){
@@ -120,8 +120,30 @@ function preview_detail(){
 function edit_detail(){
 
 }
-function save_detail_template(){
+function update_detail_template(template, response){
 
+}
+function save_detail_template(){
+    // send message to get unsaved template from content script
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {name: "get_template", url: tabs[0].url}, function(response) {
+            console.log("[Popup] Response from get_template: " + response.success);
+            if (response.template == null || response.template == undefined){
+                alert("Nothing to save!");
+                return;
+            }
+            var template = response.template;
+            console.log(template);
+            if (template.new){
+                // add new template
+                console.log("add new template");
+                add_template(template, response);
+            } else {
+                console.log("update template");
+                update_detail_template(template, response);
+            }
+        });
+    });
 }
 
 function extract_links() {
@@ -200,7 +222,7 @@ function init_portal_tab(){
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
         var url = tabs[0].url;
         // send messsage to content script to check whether template exists
-        chrome.tabs.sendMessage(tabs[0].id, {name: "template_exists", url: url}, function(response) {
+        chrome.tabs.sendMessage(tabs[0].id, {name: "template_exists", url: url, type: "portal"}, function(response) {
             console.log("[Popup] Response from template_exists: ");
             console.log(response);
             var template = response.template;
@@ -234,7 +256,7 @@ function init_detail_tab(){
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
         var url = tabs[0].url;
         // send messsage to content script to check whether template exists
-        chrome.tabs.sendMessage(tabs[0].id, {name: "template_exists", url: url}, function(response) {
+        chrome.tabs.sendMessage(tabs[0].id, {name: "template_exists", url: url, type: "news"}, function(response) {
             console.log("[Popup] Response from template_exists: ");
             console.log(response);
             var template = response.template;
