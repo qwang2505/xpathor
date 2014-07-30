@@ -314,7 +314,7 @@ function init_tab(){
 function finish_portal(){
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
         //window.location.href = "http://10.2.10.1:8000/report/source/newslist?link=" + window.location.href;
-        window.open("http://10.2.10.1:8000/report/source/newslist?link=" + tabs[0].url);
+        window.open("http://60.191.57.156:8001/report/source/newslist?link=" + tabs[0].url);
         window.close();
     });
 }

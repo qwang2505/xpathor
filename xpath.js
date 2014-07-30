@@ -4,7 +4,7 @@ var XpathGenerator = Class.extend({
 
     // good class name to locate an element
     _good_class_words: ["content", "cont", "txt", "body", "article", "item", "tit", "news", 
-        "list", "post", "summary", "smy", "info", "time", "source", "detail"],
+        "list", "post", "summary", "smy", "info", "time", "source", "detail", "zenwen"],
 
     /*
      * Get tag position in parent's children
