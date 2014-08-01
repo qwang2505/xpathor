@@ -48,8 +48,10 @@ var PortalProcessor = Processor.extend({
 						'<option value="4">Society</option><option value="5">Entertainment</option>' +
 						'<option value="6">Sport</option><option value="7">Finance</option>' +
 						'<option value="8">Technology</option><option value="9">Military</option><option value="11">History</option>' +
-						'<option value="10">Auto</option><option value="13">Life</option><option value="20">Fashion</option>' + 
-						'<option value="18">Politics</option><option value="35">Health</option><option value="38">Views</option></select>',
+						'<option value="10">Auto</option><option value="13">Life</option><option value="15">Humor</option><option value="20">Fashion</option>' + 
+						'<option value="18">Politics</option><option value="27">Beauty</option>' + 
+						'<option value="35">Health</option><option value="38">Views</option>' +
+						'<option value="40">Emotion</option><option value="41">Food</option></select>',
 	_priority_selection: '<select class="xpathor-dialog-select"><option value="-1" selected>------</option><option value="8">P0</option>' +
 						 '<option value="0">P1</option><option value="4">P2</option></select>',
 
