@@ -86,7 +86,7 @@ var TemplateManager = {
 		if (blocks.length == 0){
 			return;
 		}
-		if (this.template == null){
+		if (this.template == null || this.type != "portal"){
 			this.template = {
 				type: "portal",
 				link: window.location.href,

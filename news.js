@@ -722,6 +722,9 @@ var NewsProcessor = Processor.extend({
 	// extract source text
 	_extract_source: function(text){
 		// copy from python source: extractor/extractor.py/_clean_source
+		if (text == null | text == undefined){
+			return "";
+		}
 		text = text.replace(/[\n\r\t]/gi, "");
 		text = text.replace(/( ){2,}/gi, "");
 		text += " ";
