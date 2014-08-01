@@ -113,8 +113,12 @@ var TemplateManager = {
 		for (var i=0; i < results.length; i++){
 			var bid = results[i].blockId;
 			// TODO temporaray just select first element
-			delete results[i].newslist[0].elem;
-			this.newslist[bid] = [results[i].newslist[0]];
+			try {
+				delete results[i].newslist[0].elem;
+				this.newslist[bid] = [results[i].newslist[0]];
+			} catch (err) {
+				console.log("get newslist failed for block: " + bid);
+			}
 		}
 	},
 };

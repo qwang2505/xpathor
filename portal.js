@@ -228,70 +228,76 @@ var PortalProcessor = Processor.extend({
 		var results = [];
 		var template, result, elements, block, headlines, news, urls, item;
 		for (var i=0; i < blocks.length; i++){
-			template = blocks[i];
-			result = [];
-			elements = XpathEvaluator.evaluate(document, template.block);
-			if (elements == null || elements.length < template.index){
-				console.log("[Portal] Error when extract by template: block index out of range");
-				continue;
+			try {
+				template = blocks[i];
+				result = [];
+				elements = XpathEvaluator.evaluate(document, template.block);
+				if (elements == null || elements.length < template.index){
+					console.log("[Portal] Error when extract by template: block index out of range");
+					continue;
+				}
+				block = elements[template.index];
+				headlines = [];
+				if (template.headline.length > 0){
+					headlines = XpathEvaluator.evaluate(block, template.headline);
+					headlines = headlines == null ? [] : headlines;
+				}
+				news = [];
+				if (template.news.length > 0){
+					news = XpathEvaluator.evaluate(block, template.news);
+					news = news == null ? [] : news;
+				}
+				urls = [];
+				for (var j=0; j < headlines.length; j++){
+					item = {};
+					item.url = $(headlines[j]).attr("href");
+					if (item.url == null || item.url == undefined){
+						console.log("can not get url for headline item: ");
+						console.log(news[j]);
+						continue;
+					}
+					item.url = item.url.trim();
+					if (urls.indexOf(item.url) != -1){
+						continue;
+					}
+					item.title = $(headlines[j]).text().trim();
+					if (item.title.length != 0 && item.title.length < this._title_length_threshold){
+						continue;
+					}
+					item.category = template.category;
+					item.status = template.headline_status;
+					item.elem = headlines[j];
+					result.push(item);
+					urls.push(item.url);
+				}
+				for (var j=0; j < news.length; j++){
+					item = {};
+					item.url = $(news[j]).attr("href");
+					if (item.url == null || item.url == undefined){
+						console.log("can not get url for item: ");
+						console.log(news[j]);
+						continue;
+					}
+					item.url = item.url.trim();
+					if (urls.indexOf(item.url) != -1){
+						continue;
+					}
+					item.title = $(news[j]).text().trim();
+					if (item.title.length != 0 && item.title.length < this._title_length_threshold){
+						continue;
+					}
+					item.category = template.category;
+					item.status = template.status;
+					item.elem = news[j];
+					result.push(item);
+					urls.push(item.url);
+				}
+				results.push({block: block, category: template.category, blockId: template.id, newslist: result});
+			} catch (err) {
+				console.log("extract failed by template");
+				console.log(err);
+				console.log(blocks[i]);
 			}
-			block = elements[template.index];
-			headlines = [];
-			if (template.headline.length > 0){
-				headlines = XpathEvaluator.evaluate(block, template.headline);
-				headlines = headlines == null ? [] : headlines;
-			}
-			news = [];
-			if (template.news.length > 0){
-				news = XpathEvaluator.evaluate(block, template.news);
-				news = news == null ? [] : news;
-			}
-			urls = [];
-			for (var j=0; j < headlines.length; j++){
-				item = {};
-				item.url = $(headlines[j]).attr("href");
-				if (item.url == null || item.url == undefined){
-					console.log("can not get url for headline item: ");
-					console.log(news[j]);
-					continue;
-				}
-				item.url = item.url.trim();
-				if (urls.indexOf(item.url) != -1){
-					continue;
-				}
-				item.title = $(headlines[j]).text().trim();
-				if (item.title.length != 0 && item.title.length < this._title_length_threshold){
-					continue;
-				}
-				item.category = template.category;
-				item.status = template.headline_status;
-				item.elem = headlines[j];
-				result.push(item);
-				urls.push(item.url);
-			}
-			for (var j=0; j < news.length; j++){
-				item = {};
-				item.url = $(news[j]).attr("href");
-				if (item.url == null || item.url == undefined){
-					console.log("can not get url for item: ");
-					console.log(news[j]);
-					continue;
-				}
-				item.url = item.url.trim();
-				if (urls.indexOf(item.url) != -1){
-					continue;
-				}
-				item.title = $(news[j]).text().trim();
-				if (item.title.length != 0 && item.title.length < this._title_length_threshold){
-					continue;
-				}
-				item.category = template.category;
-				item.status = template.status;
-				item.elem = news[j];
-				result.push(item);
-				urls.push(item.url);
-			}
-			results.push({block: block, category: template.category, blockId: template.id, newslist: result});
 		}
 		return results;
 	},
