@@ -231,7 +231,14 @@ var PortalProcessor = Processor.extend({
 			try {
 				template = blocks[i];
 				result = [];
-				elements = XpathEvaluator.evaluate(document, template.block);
+				try {
+					elements = XpathEvaluator.evaluate(document, template.block);
+				} catch (err){
+					console.log("extract block elements failed by template");
+					console.log(err);
+					console.log(template.block);
+					continue;
+				}
 				if (elements == null || elements.length < template.index){
 					console.log("[Portal] Error when extract by template: block index out of range");
 					continue;
@@ -239,12 +246,26 @@ var PortalProcessor = Processor.extend({
 				block = elements[template.index];
 				headlines = [];
 				if (template.headline.length > 0){
-					headlines = XpathEvaluator.evaluate(block, template.headline);
+					try {
+						headlines = XpathEvaluator.evaluate(block, template.headline);
+					} catch (err){
+						console.log("extract headline failed by template");
+						console.log(err);
+						console.log(template.headline);
+						continue;
+					}
 					headlines = headlines == null ? [] : headlines;
 				}
 				news = [];
 				if (template.news.length > 0){
-					news = XpathEvaluator.evaluate(block, template.news);
+					try {
+						news = XpathEvaluator.evaluate(block, template.news);
+					} catch (err){
+						console.log("extract normal news failed by template");
+						console.log(err);
+						console.log(template.news);
+						continue;
+					}
 					news = news == null ? [] : news;
 				}
 				urls = [];
