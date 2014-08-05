@@ -649,7 +649,7 @@ var XpathEvaluator = {
     },
 
     _is_full_text: function(xpath){
-        return xpath.indexOf("/text_content()") == (xpath.length - "/text_content()".length);
+        return xpath.indexOf("/text_content()") != -1 && (xpath.indexOf("/text_content()") == (xpath.length - "/text_content()".length));
     },
 
     // extract full text content of elem
