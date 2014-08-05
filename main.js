@@ -152,9 +152,65 @@ chrome.runtime.onMessage.addListener(
             response.content_type = _content_type;
             sendResponse(response);
             return;
+        } else if (request.name == "validate_news"){
+            if (TemplateManager.type != "portal"){
+                alert("only portal can validate news");
+                return;
+            }
+            var template = TemplateManager.template;
+            var newslist = TemplateManager.newslist;
+            validate_news(template, newslist);
         } else {
             console.log("Unknow request: " + request.name);
         }
 		sendResponse({success: true});
     }
 );
+
+function get_validate_news_dialog(){
+    var dialog = $("#xpathor-validate-news-dialog");
+    if (dialog == null || dialog.length == 0){
+        $("body").append("<div id='xpathor-validate-news-dialog' class='xpathor-validate-news-dialog'>" +
+                        "<a class=\"xpathor-validate-boxclose\" id=\"xpathor-validate-boxclose\"></a>" +
+                        "<div id='xpathor-validate-news-list' style='margin-top: 10px'></div></div>");
+        $("#xpathor-validate-boxclose").click(function(){
+            $("#xpathor-validate-news-dialog").toggleClass("xpathor-dialog-show");
+        });
+    }
+}
+
+// popup validate news dialog to validate news list. 
+function validate_news(template, newslist){
+    console.log("validate news");
+    get_validate_news_dialog();
+    var html = "<table cellspacing='0' border='1' width='95%'><tr><th width='80%'>Title</th><th width='20%'>Validate</th></tr>"
+    // get dialog
+    var count = 0;
+    for (var i=0; i < template.blocks.length; i++){
+        if (!template.blocks[i].new || template.blocks[i].validated){
+            continue
+        }
+        var bid = template.blocks[i].id;
+        if (bid in newslist){
+            var title = newslist[bid][0].title;
+            if (title == null || title == undefined || title.length == 0){
+                title = newslist[bid][0].url;
+            }
+            count += 1;
+            html += "<tr><td width='80%'><a target='_blank' href='" + newslist[bid][0].url + "'>" + title + "</a></td>" +
+                    "<td width='20%'><input class='xpathor-validate-news-btn' type='button' value='Validate' bid='" + bid + "'></td></tr>";
+        }
+    }
+    html += "</table>";
+    if (count > 0){
+        $("#xpathor-validate-news-list").html(html);
+        $(".xpathor-validate-news-btn").each(function(){
+            $(this).click(function(){
+                var bid = $(this).attr("bid");
+                TemplateManager.validate_block_news(bid);
+                $(this).attr("disabled", true);
+            });
+        })
+        $("#xpathor-validate-news-dialog").toggleClass("xpathor-dialog-show");
+    }
+}

@@ -408,3 +408,52 @@ a.xpathor-boxclose{
 	table-layout: fixed;
 	overflow-x: hidden;
 }
+.xpathor-validate-news-dialog {
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	min-width: 400px;	
+	min-height: 120px;
+	margin-top: -200px;
+	margin-left: -200px;
+	background: -webkit-gradient(linear, left top, right top, from(#dddddd),color-stop(0.25, #cccccc), color-stop(0.5, #dddddd), color-stop(0.75, #cccccc), to(#dddddd));
+	z-index: 999999999;
+	border-radius: 10px;
+	padding: 20px;
+	padding-left: 30px;
+	padding-right: 0px;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 1s, visibility 1s;
+	box-shadow: 5px 5px 2px #aaaaaa;
+	font-size: 12px !important;
+	font-family: 'simsun' !important;
+	color: black !important;
+	line-height: 20px !important;
+	direction: ltr;
+	text-indent: 0px !important;
+}
+.xpathor-validate-news-dialog.xpathor-dialog-show {
+	visibility: visible !important;
+	opacity: 1 !important;
+}
+
+a.xpathor-validate-boxclose{
+    float:right;
+    margin-top:-25px;
+    margin-right:-10px;
+    cursor:pointer;
+    color: #fff;
+    border: 1px solid #AEAEAE;
+    border-radius: 10px;
+    background: #605F61;
+    font-size: 31px;
+    font-weight: bold;
+    display: inline-block;
+    line-height: 0px;
+    padding: 11px 3px;       
+}
+
+.xpathor-validate-boxclose:before {
+    content: "×";
+}

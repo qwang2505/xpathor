@@ -442,7 +442,8 @@ var PortalProcessor = Processor.extend({
 				//continue;
 			}
 			// construct newslist html
-			var newslist_html = "<table cellspacing='0'><tr><td class='xpathor-preview-newslist-priority'><strong>Priority</strong></td><td><strong>Title</strong></td></tr>";
+			var newslist_html = "<table style='min-width: 500px' cellspacing='0'><tr><td class='xpathor-preview-newslist-priority'><strong>Priority</strong></td>" + 
+								"<td><strong>Title</strong></td></tr>";
 			for (var j=0; j < results[i].newslist.length; j++){
 				var p = this._priority_map[results[i].newslist[j].status] || "P2";
 				$(results[i].newslist[j].elem).attr("xpathor_priority", p);
@@ -528,7 +529,7 @@ var PortalProcessor = Processor.extend({
 				'<div id="xpathor_dialog_edit_category" class="xpathor-selection-block xpathor-category">' + this._category_selection + '</div>' + 
 				'<div id="xpathor_dialog_edit_headline" class="xpathor-selection-block xpathor-headline">' + this._priority_selection + '</div>' +
 				'<div id="xpathor_dialog_edit_normal" class="xpathor-selection-block xpathor-normal">' + this._priority_selection + '</div>' +
-				'<div id="xpathor_dialog_edit_block" class="xpathor-selection-block xpathor-block"><input disabled type="text" value=\'\' /></div>' +
+				'<div id="xpathor_dialog_edit_block" class="xpathor-selection-block xpathor-block"><input type="text" value=\'\' /></div>' +
 				'<div id="xpathor_dialog_edit_headline_xpath" class="xpathor-selection-block xpathor-headline-xpath"><input type="text" value=\'\' /></div>' +
 				'<div id="xpathor_dialog_edit_news_xpath" class="xpathor-selection-block xpathor-news-xpath"><input type="text" value=\'\' /></div>' +
 				'<div class="xpathor-selection-buttons"><input type="button" value="取消" id="xpathor_edit_dialog_cancel" class="xpathor-dialog-button"></input>' + 
@@ -555,12 +556,13 @@ var PortalProcessor = Processor.extend({
 					alert("Please select priority of normal news!");
 					return;
 				}
+				var block_xpath = $("#xpathor_dialog_edit_block input").val();
 				var headline_xpath = $("#xpathor_dialog_edit_headline_xpath input").val();
 				var news_xpath = $("#xpathor_dialog_edit_news_xpath input").val();
 				// update templates and re-preview result
 				var block_id = $(this).attr("xpathor_block_id");
 				TemplateManager.edit_block(block_id, {category: parseInt(cate), headline_status: parseInt(headline_p), 
-					status: parseInt(normal_p), headline: headline_xpath, news: news_xpath});
+					status: parseInt(normal_p), headline: headline_xpath, news: news_xpath, block: block_xpath});
 				obj.refresh_block_preview.call(obj, block_id);
 				// hide dialog
 				$("#xpathor_edit_dialog").toggleClass("xpathor-dialog-show");

@@ -131,6 +131,7 @@ function save_detail_template(){
             if (response.template == null || response.template == undefined){
                 alert("Nothing to save!");
                 return;
+                window.close();
             }
             var template = response.template;
             console.log(template);
@@ -182,6 +183,21 @@ function preview_blocks(){
     }
 }
 
+// check if news in blocks need to validate.
+function _need_validate(template, response){
+    var newslist = response.newslist;
+    for (var i=0; i < template.blocks.length; i++){
+        if (!template.blocks[i].new || template.blocks[i].validated){
+            continue;
+        }
+        var bid = template.blocks[i].id;
+        if (bid in newslist){
+            return true;
+        }
+    }
+    return false;
+}
+
 function save_template(){
     // send message to get unsaved template from content script
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -192,7 +208,13 @@ function save_template(){
                 return;
             }
             var template = response.template;
-            console.log(template);
+            if (_need_validate(template, response)){
+                chrome.tabs.sendMessage(tabs[0].id, {name: "validate_news", url: tabs[0].url}, function(response){
+                    return;
+                })
+                window.close();
+                return;
+            }
             if (template.new){
                 // add new template
                 console.log("add new template");
@@ -230,7 +252,6 @@ function init_portal_tab(){
                 if (response.type == "portal"){
                     $("#preview_blocks_btn").removeClass("hide");
                     $("#add_blocks_btn").removeClass("hide");
-                    $("#finish_portal_btn").removeClass("hide");
                     if (response.previewing){
                         $("#preview_blocks_btn").html("Stop Preview");
                     }
@@ -311,11 +332,15 @@ function init_tab(){
     });
 }
 
-function finish_portal(){
+function report_error(){
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-        //window.location.href = "http://10.2.10.1:8000/report/source/newslist?link=" + window.location.href;
-        window.open("http://60.191.57.156:8001/report/source/newslist?link=" + tabs[0].url);
-        window.close();
+        var url = tabs[0].url;
+        chrome.tabs.sendMessage(tabs[0].id, {name: "get_content_type", url: url}, function(response) {
+            var type = response.content_type;
+            window.open("mailto:qwang@bainainfo.com?subject=" + escape("Report Xpathor Error [" + (type || "unknow type") + "]") + 
+                        "&body=" + escape("\n\nURL: " + url + "\n\nError message: \n"));
+            window.close();
+        });
     });
 }
 
@@ -330,9 +355,9 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("preview_blocks_btn").addEventListener('click', preview_blocks); 
     document.getElementById("save_template_btn").addEventListener('click', save_template); 
     document.getElementById("add_blocks_btn").addEventListener('click', add_blocks); 
-    document.getElementById("finish_portal_btn").addEventListener('click', finish_portal); 
     // extra buttons
     document.getElementById("login_btn").addEventListener('click', login); 
+    document.getElementById("report_error_btn").addEventListener('click', report_error); 
 
     // default all tab content should not show, send message to content script
     // to get content type, if can not get, show the first one.

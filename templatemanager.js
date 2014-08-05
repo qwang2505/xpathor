@@ -41,10 +41,15 @@ var TemplateManager = {
 		}
 		return true;
 	},
+	// only called in main.js while set template
 	set_template: function(template, loaded){
 		// validate portal template, if id not exists, generate one
 		this.template = template;
 		this.type = "portal";
+		for (var i=0; i < this.template.blocks.length; i++){
+			this.template.blocks[i].new = false;
+			this.template.blocks[i].validated = true;
+		}
 		// if loaded template has no id, generate one used in xpathor, and delete id
 		// while updating.
 		if (template.type == "portal" && !this._validate_block_id(true)){
@@ -75,8 +80,11 @@ var TemplateManager = {
 				this.template.blocks[i].category = update_map.category;
 				this.template.blocks[i].headline_status = update_map.headline_status;
 				this.template.blocks[i].status = update_map.status;
+				this.template.blocks[i].block = update_map.block;
 				this.template.blocks[i].headline = update_map.headline;
 				this.template.blocks[i].news = update_map.news;
+				this.template.blocks[i].new = true;
+				this.template.blocks[i].validated = true;
 				this.changed = true;
 				break;
 			}
@@ -96,6 +104,8 @@ var TemplateManager = {
 			this.type = "portal";
 		}
 		for (var i=0; i < blocks.length; i++){
+			blocks[i].new = true;
+			blocks[i].validated = false;
 			this.template.blocks.push(blocks[i]);
 		}
 		this._validate_block_id(true);
@@ -118,6 +128,14 @@ var TemplateManager = {
 				this.newslist[bid] = [results[i].newslist[0]];
 			} catch (err) {
 				console.log("get newslist failed for block: " + bid);
+			}
+		}
+	},
+	// validate block news
+	validate_block_news: function(block_id){
+		for (var i=0; i < this.template.blocks.length; i++){
+			if (this.template.blocks[i].id == block_id){
+				this.template.blocks[i].validated = true;
 			}
 		}
 	},
