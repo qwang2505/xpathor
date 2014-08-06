@@ -288,6 +288,7 @@ var PortalProcessor = Processor.extend({
 					item.category = template.category;
 					item.status = template.headline_status;
 					item.elem = headlines[j];
+					item.seed_id = template.id + "1";
 					result.push(item);
 					urls.push(item.url);
 				}
@@ -310,6 +311,7 @@ var PortalProcessor = Processor.extend({
 					item.category = template.category;
 					item.status = template.status;
 					item.elem = news[j];
+					item.seed_id = template.id + "2";
 					result.push(item);
 					urls.push(item.url);
 				}
@@ -373,6 +375,7 @@ var PortalProcessor = Processor.extend({
 		var extract_result = this._extract(blocks);
 		// TODO save blocck news list
 		TemplateManager.save_newslist(extract_result);
+		console.log("extract result: ");
 		console.log(extract_result);
 		// generate html by result
 		this._preview(extract_result, this);
@@ -442,8 +445,9 @@ var PortalProcessor = Processor.extend({
 				//continue;
 			}
 			// construct newslist html
-			var newslist_html = "<table style='min-width: 500px' cellspacing='0'><tr><td class='xpathor-preview-newslist-priority'><strong>Priority</strong></td>" + 
-								"<td><strong>Title</strong></td></tr>";
+			var newslist_html = "<table style='min-width: 800px' cellspacing='0'><tr><td width='10%' class='xpathor-preview-newslist-seed'><strong>Seed Id</strong></td>" + 
+								"<td style='width:10%' class='xpathor-preview-newslist-priority'><strong>Priority</strong></td><td><strong>Title</strong></td></tr>";
+			var left = 999999, right = 0, top = 999999, bottom = 0;
 			for (var j=0; j < results[i].newslist.length; j++){
 				var p = this._priority_map[results[i].newslist[j].status] || "P2";
 				$(results[i].newslist[j].elem).attr("xpathor_priority", p);
@@ -454,8 +458,24 @@ var PortalProcessor = Processor.extend({
 					// TODO solve relative link
 					title = results[i].newslist[j].url;
 				}
-				newslist_html += "<tr><td class='xpathor-preview-newslist-priority'>" + p + "</td><td width='88%'><a target='_blank' href='" + results[i].newslist[j].url + "'>" + 
-									title + "</a></td></tr>";
+				newslist_html += "<tr><td class='xpathor-preview-newslist-seed'>" + results[i].newslist[j].seed_id + 
+								"</td><td class='xpathor-preview-newslist-priority'>" + p + "</td><td><a target='_blank' href='" + 
+								results[i].newslist[j].url + "'>" + title + "</a></td></tr>";
+				var p = $(results[i].newslist[j].elem).offset();
+				var width = $(results[i].newslist[j].elem).width();
+				var height = $(results[i].newslist[j].elem).outerHeight();
+				if (p.left < left){
+					left = p.left;
+				}
+				if (p.top < top){
+					top = p.top;
+				}
+				if (p.left + width > right){
+					right =p.left + width;
+				}
+				if (p.top + height > bottom){
+					bottom = p.top + height;
+				}
 			}
 			newslist_html += "</table>";
 			var block = results[i].block;
@@ -464,14 +484,25 @@ var PortalProcessor = Processor.extend({
 			var p = $(block).offset();
 			var width = $(block).width();
 			var height = $(block).outerHeight();
+			if (p.left < left){
+				left = p.left;
+			}
+			if (p.top < top){
+				top = p.top;
+			}
+			if (left + width < right){
+				width = right - left;
+			}
+			if (top + height < bottom){
+				height = bottom - top;
+			}
 			// set preview position
-			$(preview_block).css({left: p.left, top: p.top - 24, width: width, height: height + 24, display: "block"});
+			$(preview_block).css({left: left, top: top - 24, width: width, height: height + 24, display: "block"});
 			// set to used to avoid using by other preview block.
 			$(preview_block).attr("used", "true");
 			// set newslist html
 			$(".xpathor-preview-newslist", $(preview_block)).html(newslist_html);
 			$("table", $(preview_block)).css({width: width - 50});
-			$(".xpathor-preview-newslist-priority", $(preview_block)).css({width: (width - 50) * 0.1});
 			// set extra attr on preview block to get later
 			$(block).attr("xpathor_preview_block_id", results[i].blockId);
 			// update cateogry

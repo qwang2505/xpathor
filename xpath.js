@@ -231,8 +231,8 @@ var XpathGenerator = Class.extend({
  */
 var BlockXpathGenerator = XpathGenerator.extend({
 
-    _good_news_parent_tags: ["UL", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "P", "SPAN", "DD"],
-    _good_headline_parent_tags: ["UL", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "STRONG", "B", "DT"],
+    _good_news_parent_tags: ["UL", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "P", "SPAN", "DD", "TD", "DIV"],
+    _good_headline_parent_tags: ["UL", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "STRONG", "B", "DT", "TD", "DIV"],
 
     /*
      * Get node xpath, described by only current node, with class or id to locate the element
