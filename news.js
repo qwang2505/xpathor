@@ -824,6 +824,10 @@ var NewsProcessor = Processor.extend({
 
 	// extract time from text
 	_extract_time: function(text){
+		if (text == null || text == undefined){
+			var now = new Date();
+			return now;
+		}
 		var res = this._time_res.all;
 		var match;
 		for (var i=0; i < res.length; i++){

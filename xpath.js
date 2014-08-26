@@ -271,7 +271,7 @@ var BlockXpathGenerator = XpathGenerator.extend({
                 return tag + "[@id=\"" + id + "\"]";
             }
         }
-        var clas = element.className;
+        var clas = element.className.replace(" xpathor-selection", "").replace("xpathor-selection", "");
         if (clas.length <= 0){
             return "";
         }
@@ -608,7 +608,7 @@ var XpathEvaluator = {
 
     // extract result by xpath
     evaluate: function(context, xpath){
-        if (xpath == NOT_SET || xpath.length == 0){
+        if (xpath == null || xpath == NOT_SET || xpath.length == 0){
             return null;
         }
         if (this._is_text(xpath)){
