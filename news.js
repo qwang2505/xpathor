@@ -811,7 +811,7 @@ var NewsProcessor = Processor.extend({
 		content = this._replace_images(content, pictures);
 		//console.log(content);
 		// insert head images
-		if (head_images.length > 0){
+		if (head_images != undefined && head_images != null && head_images.length > 0){
 			for (var i=0; i < head_images.length; i++){
 				content = "<div><img style='margin: 0 auto; display: block' src='" + head_images[i] + "'></img></div>" + content;
 			}
