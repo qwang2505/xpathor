@@ -608,7 +608,7 @@ var XpathEvaluator = {
 
     // extract result by xpath
     evaluate: function(context, xpath){
-        if (xpath == null || xpath == NOT_SET || xpath.length == 0){
+        if (xpath == undefined || xpath == null || xpath == NOT_SET || xpath.length == 0){
             return null;
         }
         if (this._is_text(xpath)){

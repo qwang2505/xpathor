@@ -398,8 +398,16 @@ var NewsProcessor = Processor.extend({
 		var result = new ExtractResult();
 		result.title = XpathEvaluator.evaluate(document, template.title);
 		//console.log("[News] get title: " + result.title);
+		// extract head images by template
+		var head_images = [];
+		if (template.images != undefined && template.images != null && template.images.length > 0){
+			head_images = XpathEvaluator.evaluate(document, template.images);
+			if (typeof(head_images) == "string"){
+				head_images = [head_images];
+			}
+		}
 		result.content = XpathEvaluator.evaluate(document, template.content);
-		result.content = this._extract_content(result.content);
+		result.content = this._extract_content(result.content, head_images);
 		//console.log("[News] get content node: " + result.content);
 		result.source = XpathEvaluator.evaluate(document, template.source);
 		result.source = this._extract_source(result.source);
@@ -771,7 +779,7 @@ var NewsProcessor = Processor.extend({
 	},
 
 	// extract content from dom node, rewrite from python source
-	_extract_content: function(node){
+	_extract_content: function(node, head_images){
 		var clone = $(node).clone();
 		// extract images from content node
 		var pictures = ImageExtractor.extract_images(clone);
@@ -802,6 +810,12 @@ var NewsProcessor = Processor.extend({
 		// replace images in content
 		content = this._replace_images(content, pictures);
 		//console.log(content);
+		// insert head images
+		if (head_images.length > 0){
+			for (var i=0; i < head_images.length; i++){
+				content = "<div><img style='margin: 0 auto; display: block' src='" + head_images[i] + "'></img></div>" + content;
+			}
+		}
 		return content;
 	},
 
