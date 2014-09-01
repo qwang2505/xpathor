@@ -46,7 +46,7 @@ var PortalProcessor = Processor.extend({
 	_category_selection: '<select class="xpathor-dialog-select"><option value="-1" selected>------</option><option value="1">Important News</option>' + 
 						'<option value="2">International</option><option value="3">National</option>' + 
 						'<option value="4">Society</option><option value="5">Entertainment</option>' +
-						'<option value="6">Sport</option><option value="7">Finance</option>' +
+						'<option value="6">Sport</option><option value="7">Finance</option><option value="12">Other</option>' +
 						'<option value="8">Technology</option><option value="9">Military</option><option value="11">History</option>' +
 						'<option value="10">Auto</option><option value="13">Life</option><option value="15">Humor</option><option value="20">Fashion</option>' + 
 						'<option value="18">Politics</option><option value="24">Law</option><option value="27">Beauty</option>' + 
@@ -485,18 +485,24 @@ var PortalProcessor = Processor.extend({
 			var p = $(block).offset();
 			var width = $(block).width();
 			var height = $(block).outerHeight();
-			if (p.left < left){
+			if ((width / height > 10 || height / width > 10) && left >= 0 && top >= 0){
+				if (p.left < left){
+					left = p.left;
+				}
+				if (p.top < top){
+					top = p.top;
+				}
+				if (left + width < right){
+					width = right - left;
+				}
+				if (top + height < bottom){
+					height = bottom - top;
+				}
+			} else {
 				left = p.left;
-			}
-			if (p.top < top){
 				top = p.top;
 			}
-			if (left + width < right){
-				width = right - left;
-			}
-			if (top + height < bottom){
-				height = bottom - top;
-			}
+			
 			// set preview position
 			$(preview_block).css({left: left, top: top - 24, width: width, height: height + 24, display: "block"});
 			// set to used to avoid using by other preview block.
