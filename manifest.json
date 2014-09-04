@@ -16,8 +16,8 @@
             "https://*/*"
         ],
         "js": ["jquery.js", "jquery.xpath.min.js", "uuid.js", "storage.js", "templatemanager.js", 
-            "md5.js", "class.js", "xpath_evaluator.js", "xpath_generator.js", "portal_xpath_generator.js", 
-            "definations.js", "processor.js", "news.js", "portal.js", "roll.js", "main.js"],
+            "md5.js", "class.js", "xpath_evaluator.js", "xpath_generator.js", "reliable_xpath_generator.js", 
+            "portal_xpath_generator.js", "definations.js", "processor.js", "news.js", "portal.js", "roll.js", "main.js"],
         "css": ["main.css"],
         "run_at": "document_end",
         "all_frames": true

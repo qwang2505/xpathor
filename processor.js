@@ -35,7 +35,7 @@ var Processor = Class.extend({
             $(event.target).removeClass("xpathor-selection");
             //try {
                 // get xpath
-                var xpathor = new XpathGenerator();
+                var xpathor = new ReliableXpathGenerator();
                 var xpath = xpathor.get_fixed_xpath(event.target);
             //} catch (err) {
             //    console.log(err.name + ": " + err.message);

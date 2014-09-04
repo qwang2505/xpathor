@@ -53,7 +53,7 @@ var ReliableXpathGenerator = XpathGenerator.extend({
      */
     _fix_id: function(id){
         // TODO need to implement better
-        return id.replace(/\d+/g, "");
+        return id.split(/\d+/, "");
     },
 
     /*
@@ -61,8 +61,7 @@ var ReliableXpathGenerator = XpathGenerator.extend({
      */
     _fix_class: function(clas){
         // TODO what if number in middle of class name?
-        clas = clas.replace(/\d+/g, "");
-        return clas.split(" ");
+        return clas.split(/[\d+ ]/);
     },
 
     /*
@@ -78,28 +77,42 @@ var ReliableXpathGenerator = XpathGenerator.extend({
         var id = element.id;
         if (id != undefined && id != null && id.length > 0){
             // do not need to fix id 
-            var new_id = this._fix_id(id);
-            if (id.length != new_id.length){
-                // fixed
-                if (id.indexOf(new_id) == 0){
-                    xpaths.push(tag + "[starts-with(@id, \"" + new_id + "\")]");
+            var new_ids = this._fix_id(id);
+            for (var i=0; i < new_ids.length; i++){
+                if (new_ids[i].length == 0) {
+                    continue;                    
+                }               
+                var new_id = new_ids[i];
+                if (id.length != new_id.length){
+                    // fixed
+                    if (id.indexOf(new_id) == 0){
+                        xpaths.push(tag + "[starts-with(@id, \"" + new_id + "\")]");
+                    } else {
+                        // use full id in xpath, maybe contains numbers, but we donot care
+                        // this is different with same process in XpathGenerator
+                        xpaths.push(tag + "[contains(@id, \"" + new_id + "\")]");
+                    }
                 } else {
-                    // use full id in xpath, maybe contains numbers, but we donot care
-                    // this is different with same process in XpathGenerator
-                    xpaths.push(tag + "[contains(@id, \"" + new_id + "\")]");
+                    xpaths.push(tag + "[@id=\"" + id + "\"]");
                 }
-            } else {
-                xpaths.push(tag + "[@id=\"" + id + "\"]");
             }
         }
         // don't have an id, we get xpath by class attribute
         var clas = element.className;
+        clas = clas.replace("xpathor-selection", "");
         var clases = this._fix_class(clas);
         for (var i=0; i < clases.length; i++){
+            if (clases[i].length == 0){
+                continue;
+            }
             if (this._good_class_words.indexOf(clases[i].toLowerCase()) != -1){
                 if (clas.indexOf(clases[i]) != -1){
                 	if (clas.length != clases[i].length){
-                		xpaths.push(tag + "[contains(@class, \"" + clases[i] + "\")]");
+                        if (clas.indexOf(clases[i]) == 0){
+                            xpaths.push(tag + "[starts-with(@class, \"" + clases[i] + "\")]");
+                        } else {
+                    		xpaths.push(tag + "[contains(@class, \"" + clases[i] + "\")]");
+                        }
                 	} else {
                 		xpaths.push(tag + "[@class=\"" + clases[i] + "\"]");
                 	}
@@ -107,10 +120,17 @@ var ReliableXpathGenerator = XpathGenerator.extend({
             }
         }
         for (var i=0; i < clases.length; i++){
+            if (clases[i].length == 0){
+                continue;
+            }
             if (this._good_class_words.indexOf(clases[i].toLowerCase()) == -1){
                 if (clas.indexOf(clases[i]) != -1){
                 	if (clas.length != clases[i].length){
-                		xpaths.push(tag + "[contains(@class, \"" + clases[i] + "\")]");
+                        if (clas.indexOf(clases[i]) == 0){
+                            xpaths.push(tag + "[starts-with(@class, \"" + clases[i] + "\")]");
+                        } else {
+                    		xpaths.push(tag + "[contains(@class, \"" + clases[i] + "\")]");
+                        }
                 	} else {
                 		xpaths.push(tag + "[@class=\"" + clases[i] + "\"]");
                 	}
@@ -179,20 +199,47 @@ var ReliableXpathGenerator = XpathGenerator.extend({
         return element;
     },
 
+    _get_working_xpath: function(element, xpaths){
+        for (var i=0; i < xpaths.length; i++){
+            console.log("verify xpath: " + xpaths[i]);
+            var obj = $(document).xpath("//" + xpaths[i]);
+            if (obj == undefined || obj == null){
+                continue;
+            }
+            obj = obj.get(0);
+            if (obj == undefined || obj == null){
+                continue;
+            }
+            console.log("compare result and target element");
+            console.log(obj);
+            console.log(element);
+            if (obj == element){
+                return xpaths[i];
+            }
+        }
+        return "";
+    },
+
     /*
      * Get fixed xpath, described by id, class, as simple as possible, but can locate
      * the element with xpath
      */
     get_fixed_xpath: function(element){
+        console.log("get reliable xpath for element");
+        console.log(element);
         element = this._normalize_element(element);
         // get xpath from current node, by id or class
-        var xpath = this._get_node_xpath(element);
+        var xpaths = this._get_node_xpath(element);
+        console.log("get xpaths by node");
+        console.log(xpaths);
+        var xpath = this._get_working_xpath(element, xpaths);
         // TODO verify xpaths
         if (xpath.length > 0){
             return "//" + xpath;
         }
-        // get xpath by parents
-        xpath = this._get_xpath_by_parents(element);
+        // get xpaths by parents
+        xpaths = this._get_xpath_by_parents(element);
+        xpath = this._get_working_xpath(element, xpaths);
         if (xpath.length > 0){
             return "//" + xpath;
         }

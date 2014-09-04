@@ -309,7 +309,7 @@ var NewsProcessor = Processor.extend({
         			$(window).unbind("keyup");
         			// press enter
         			var elem =  $(".xpathor-selection")[0];
-        			var xpathor = new XpathGenerator();
+        			var xpathor = new ReliableXpathGenerator();
                 	var xpath = xpathor.get_fixed_xpath(elem);
 	                // stop select and switch
 	                $(elem).removeClass("xpathor-selection");
