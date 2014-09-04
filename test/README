@@ -1,0 +1,9 @@
+This folder contains some test scripts run by phantomjs.
+
+Tool scripts:
+1. download_pages.py: download pages list in urls files for testing.
+2. *_urls.txt: url list of specific test.
+3. *_result.txt: test result of specific test.
+
+Test scripts:
+1. test_news_xpath_generage.js: test correcting rate of news xpath generating.
