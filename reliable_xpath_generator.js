@@ -53,7 +53,7 @@ var ReliableXpathGenerator = XpathGenerator.extend({
      */
     _fix_id: function(id){
         // TODO need to implement better
-        return id.split(/\d+/, "");
+        return id.split(/\d+/);
     },
 
     /*
@@ -165,6 +165,7 @@ var ReliableXpathGenerator = XpathGenerator.extend({
      */
     _get_xpath_by_parents: function(element){
         console.log("[Xpath] Get xpath by parents");
+        var xpaths = [];
         var parent = element.parentNode;
         var count = 0;
         var max_count = 5;
@@ -173,18 +174,18 @@ var ReliableXpathGenerator = XpathGenerator.extend({
         parents.push(element);
         while (parent != undefined && parent != null){
             if (count > max_count){
-                return "";
+                return xpaths;
             }
             xpath = this._get_node_xpath(parent);
             if (xpath.length > 0){
                 parents.push(parent);
-                return this._get_xpath_by_given_parents(xpath, parents);
+                xpaths.push(this._get_xpath_by_given_parents(xpath, parents));
             }
             parents.push(parent);
             count += 1;
             parent = parent.parentNode;
         }
-        return "";
+        return xpaths;
     },
 
     /*
