@@ -59,6 +59,7 @@ var NewsTemplate = Class.extend({
 		this.pubDate = data.publish_time;
 		this.source = data.source;
 		this.nextPage = data.next_page;
+		this.images = data.images;
 	},
 });
 
@@ -75,7 +76,7 @@ jQuery.fn.justtext = function() {
 	if (first == null || first == undefined){
 		return "";
 	}
-    return first.nodeValue == null ? "" : first.nodeValue;
+    return first.wholeText == null ? "" : first.wholeText;
 };
 
 jQuery.fn.tail = function(){
@@ -83,5 +84,5 @@ jQuery.fn.tail = function(){
 	if (next == null || next == undefined){
 		return "";
 	}
-	return next.nodeValue == null ? "" : next.nodeValue;
+	return next.wholeText == null ? "" : next.wholeText;
 }

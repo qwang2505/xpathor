@@ -118,7 +118,13 @@ function preview_detail(){
     });
 }
 function edit_detail(){
-
+    console.log("[Popup] add detail template clicked");
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {name: "extract_news", url: tabs[0].url}, function(response) {
+            console.log("[Popup] Response from extract_news: " + response.success);
+            window.close();
+        });
+    });
 }
 function update_detail_template(template, response){
 

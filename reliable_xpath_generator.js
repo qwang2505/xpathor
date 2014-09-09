@@ -170,18 +170,21 @@ var ReliableXpathGenerator = XpathGenerator.extend({
         var count = 0;
         var max_count = 5;
         var xpath = "";
+        var temp_xpaths = [];
         var parents = new Array();
         parents.push(element);
         while (parent != undefined && parent != null){
             if (count > max_count){
                 return xpaths;
             }
-            xpath = this._get_node_xpath(parent);
-            if (xpath.length > 0){
-                parents.push(parent);
-                xpaths.push(this._get_xpath_by_given_parents(xpath, parents));
-            }
+            temp_xpaths = this._get_node_xpath(parent);
             parents.push(parent);
+            for (var i=0; i < temp_xpaths.length; i++){
+                xpath = temp_xpaths[i];
+                if (xpath.length > 0){
+                    xpaths.push(this._get_xpath_by_given_parents(xpath, parents));
+                }
+            }
             count += 1;
             parent = parent.parentNode;
         }

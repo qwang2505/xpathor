@@ -84,6 +84,7 @@ var ImageExtractor = {
 				// valid image src
 				result = this._validate_image(imgs[i], src);
 				if (!result.valid){
+					console.log("image not valid: " + src);
 					continue;
 				}
 				score = this._score_image(imgs[i], src, result.width, result.height);
@@ -172,6 +173,7 @@ var NewsProcessor = Processor.extend({
 		content: "source",
 		source: "publish_time",
 		publish_time: "next_page",
+		next_page: "images",
 	},
 
 	_tip_map: {
@@ -180,6 +182,7 @@ var NewsProcessor = Processor.extend({
 		source: "Source",
 		publish_time: "Publish Time",
 		next_page: "Next Page",
+		images: "Images",
 	},
 
 	show_tip: function(item_name){
@@ -247,7 +250,7 @@ var NewsProcessor = Processor.extend({
 			} else if (next_item == "source"){
 				this.start_select(message, this.next);
 			}
-		} else if (item == "next_page"){
+		} else if (item == "images"){
 			this.stop_select();
 			this.hide_tip();
 			this.post_process(message);
@@ -256,6 +259,39 @@ var NewsProcessor = Processor.extend({
 			return;
 		}
 	},
+
+	    // start to select element with mouse
+    start_select: function(message, callback){
+        $(window).mouseenter(function(event){
+            $(event.target).addClass("xpathor-selection");
+        });
+        $(window).mouseleave(function(event){
+            $(event.target).removeClass("xpathor-selection");
+        });
+        $(window).click(function(event){
+            $(event.target).removeClass("xpathor-selection");
+            var xpathor = new NewsXpathGenerator();
+            if (message.item == "images"){
+            	var xpath = xpathor.get_images_xpath(event.target);
+            } else {
+            	var xpath = xpathor.get_fixed_xpath(event.target);
+            }
+            // TODO process xpath, pass to specific receiver
+            var item_name = message.item;
+            var obj = message.obj;
+            message.data[item_name] = xpath;
+            callback.call(obj, message);
+            return false;
+        });
+        $(window).bind("contextmenu", function(event){
+            $(event.target).removeClass("xpathor-selection");
+            var item_name = message.item;
+            var obj = message.obj;
+            message.data[item_name] = NOT_SET;
+            callback.call(obj, message);
+            return false;
+        });
+    },
 
 	// TODO add restart callback
 	select_content: function(obj, message, callback){
@@ -369,11 +405,13 @@ var NewsProcessor = Processor.extend({
 		template.source = XpathEvaluator.fill_xpath(template.source, "full_text");
 		template.pubDate = XpathEvaluator.fill_xpath(template.pubDate, "full_text");
 		template.nextPage = XpathEvaluator.fill_xpath(template.nextPage, "attr", "href");
+		template.images = template.images;
 		return template;
 	},
 
 	// post process data, preview, etc.
 	post_process: function(message){
+		console.log(message);
 		var template = new NewsTemplate(message.data);
 		template = this.fill_template(template);
 		// log xpath
@@ -382,6 +420,7 @@ var NewsProcessor = Processor.extend({
 		console.log("[News] source xpath: " + template.source);
 		console.log("[News] publish time xpath: " + template.pubDate);
 		console.log("[News] next page xpath: " + template.nextPage);
+		console.log("[News] images xpath: " + template.images);
 
 		var result = this.extract(template);
 		// TODO valid result
@@ -517,8 +556,8 @@ var NewsProcessor = Processor.extend({
 		for (var i=0; i < elements.length; i++){
 			elem = $(elements[i]);
 			if (elem.css("display") == "none"){
-				//console.log("[ContentExtractor] remove hidden: ");
-				//console.log(elements[i]);
+				console.log("[ContentExtractor] remove hidden: ");
+				console.log(elements[i]);
 				unlikely_elems.push(elements[i]);
 				continue;
 			}
@@ -531,25 +570,25 @@ var NewsProcessor = Processor.extend({
 
 			match = this._args.unlikelyRe.exec(path);
 			if (match != null){
-				//console.log("[ContentExtractor] remove because match unlikely regex: ");
-				//console.log(elements[i]);
+				console.log("[ContentExtractor] remove because match unlikely regex: ");
+				console.log(elements[i]);
 				unlikely_elems.push(elements[i]);
 				continue;
 			} else if (link_density > 0.2 && text.length < 30 && this._args.unlikelyTextRe.exec(text) != null){
-				//console.log("[ContentExtractor] remove because have links and sensitive words: ");
-				//console.log(elements[i]);
+				console.log("[ContentExtractor] remove because have links and sensitive words: ");
+				console.log(elements[i]);
 				unlikely_elems.push(elements[i]);
 				continue;
 			} else if (link_density > 0.4 && imgs == 0 && text.length > 30){
-				//console.log("[ContentExtractor] remove because link density high and no image and long text: link density: " + link_density);
-				//console.log(elements[i]);
+				console.log("[ContentExtractor] remove because link density high and no image and long text: link density: " + link_density);
+				console.log(elements[i]);
 				unlikely_elems.push(elements[i]);
 				continue;
 			} else if (lis > ps){
 				var links = elem.xpath("a");
 				if (links.length >= lis){
-					//console.log("[ContentExtractor] remove because more lis and links than ps: ");
-					//console.log(elements[i]);
+					console.log("[ContentExtractor] remove because more lis and links than ps: ");
+					console.log(elements[i]);
 					unlikely_elems.push(elements[i]);
 					continue;
 				}
@@ -564,9 +603,9 @@ var NewsProcessor = Processor.extend({
 	_clean_text: function(text, tag, prev_tag){
 		text = text.replace(/([^ ]+)[\n\r]+([^ ]+)/i, "$1 $2");	
 		text = text.replace(/([\n\r]+)/i, "", text);
-		if (prev_tag == undefined || prev_tag == null || this._args.strongTags.indexOf(prev_tag) == -1){
-			text = text.trim();
-		}
+		//if (prev_tag == undefined || prev_tag == null || this._args.strongTags.indexOf(prev_tag) == -1){
+		//	text = text.trim();
+		//}
 		if (this._args.strongTags.indexOf(tag) != -1 && text.length > 0){
 			text = "<b>" + text + "</b>";
 		}
@@ -577,6 +616,8 @@ var NewsProcessor = Processor.extend({
 	_get_text: function(node){
 		var all_text = "";
 		var raw_node = node.get(0);
+		//console.log(raw_node);
+		//console.log(node.text());
 		// if node is attribute or not text and html element
 		if (raw_node.nodeType == 2 || raw_node.nodeType > 3){
 			return all_text;
@@ -590,14 +631,18 @@ var NewsProcessor = Processor.extend({
 		}
 		if (this._args.noTextTags.indexOf(tag) != -1){
 			console.log("[ContentExtractor] got no text tags: ");
-			console.log(node);
+			console.log(raw_node);
 			return all_text;
 		}
 		var paragraph = this._args.paragraphTags.indexOf(tag) != -1;
 		var text = node.justtext().trim();
+		//console.log(raw_node);
+		//console.log("get only text: " + text);
 		var length = text.length;
 		if (length > 0){
 			var domtext = this._clean_text(text, tag);
+			//console.log("Got dom text: " + domtext);
+			//console.log(raw_node);
 			all_text += domtext;
 		}
 		var children = node.children();
@@ -641,6 +686,7 @@ var NewsProcessor = Processor.extend({
 	// get text content of node
 	_get_content: function(node){
 		var content = this._get_text(node);
+		//console.log(content);
 		content = this._remove_whitespace(content);
 		content = this._append_newline(content);
 		return content.trim();
@@ -783,7 +829,7 @@ var NewsProcessor = Processor.extend({
 		var clone = $(node).clone();
 		// extract images from content node
 		var pictures = ImageExtractor.extract_images(clone);
-		//console.log("got " + pictures.length + " images from content node");
+		console.log("got " + pictures.length + " images from content node");
 		for (var i=0; i < pictures.length; i++){
 			$(pictures[i].node).replaceWith("(dolphinimagestart--" + pictures[i].id + "--dolphinimageend)");
 		}
@@ -792,6 +838,7 @@ var NewsProcessor = Processor.extend({
 		var tags = ["p", "div", "span", "ul", "table", "select"];
 		var elements = $(clone).xpath(".//p | .//div | .//span | .//ul | .//table | .//select").toArray();
 		this._remove_unlikely_elem(elements);
+		//console.log(clone.html());
 		var content = this._get_content(clone);
 		//console.log(content);
 		var chinese = this._args.chineseRe.exec(content) != null;
