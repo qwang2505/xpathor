@@ -11,6 +11,7 @@ function load_template(url){
         var template = data['data'][0];
         // show preview and append blocks button
         $("#preview_blocks_btn").removeClass("hide");
+        $("#peep_blocks_btn").removeClass("hide");
         $("#add_blocks_btn").removeClass("hide");
         // send message to content scripts to pass the template
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
@@ -32,6 +33,7 @@ function load_detail_template(url){
         var templates = data['data'];
         // show preview and append blocks button
         $("#preview_detail_btn").removeClass("hide");
+        $("#edit_detail_btn").removeClass("hide");
         // send message to content scripts to pass the template
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
             chrome.tabs.sendMessage(tabs[0].id, {name: "set_template", template: templates, url: tabs[0].url, type: "news"}, function(responsel){
@@ -189,6 +191,27 @@ function preview_blocks(){
     }
 }
 
+function peep_blocks(){
+    var html = $("#peep_blocks_btn").html();
+    if (html == "Stop Peep"){
+        console.log("[Popup] stop peep blocks");
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {name: "stop_peep_blocks", url: tabs[0].url}, function(response) {
+                console.log("[Popup] Response from stop peep blocks: " + response.success);
+            });
+            window.close();
+        });       
+    } else {
+        console.log("[Popup] peep blocks");
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {name: "peep_blocks", url: tabs[0].url}, function(response) {
+                console.log("[Popup] Response from peep blocks: " + response.success);
+            });
+            window.close();
+        });
+    }
+}
+
 // check if news in blocks need to validate.
 function _need_validate(template, response){
     var newslist = response.newslist;
@@ -257,9 +280,13 @@ function init_portal_tab(){
             if (template != null || template != undefined){
                 if (response.type == "portal"){
                     $("#preview_blocks_btn").removeClass("hide");
+                    $("#peep_blocks_btn").removeClass("hide");
                     $("#add_blocks_btn").removeClass("hide");
                     if (response.previewing){
                         $("#preview_blocks_btn").html("Stop Preview");
+                    }
+                    if (response.peeping){
+                        $("#peep_blocks_btn").html("Stop Peep");
                     }
                 } else {
                     console.log("[Popup] unknow template type: " + response.type);
@@ -358,7 +385,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("save_detail_template_btn").addEventListener('click', save_detail_template); 
     // portal link buttons
 	document.getElementById("extract_link_btn").addEventListener('click', extract_links);
-    document.getElementById("preview_blocks_btn").addEventListener('click', preview_blocks); 
+    document.getElementById("preview_blocks_btn").addEventListener('click', preview_blocks);
+    document.getElementById("peep_blocks_btn").addEventListener('click', peep_blocks);
     document.getElementById("save_template_btn").addEventListener('click', save_template); 
     document.getElementById("add_blocks_btn").addEventListener('click', add_blocks); 
     // extra buttons

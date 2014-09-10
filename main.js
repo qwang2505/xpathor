@@ -10,6 +10,7 @@ var _content_type = null;
 // });
 
 $("body").append("<div class='xpathor-selection-2'></div>");
+$("body").append("<div id='xpathor_peep_blocks'></div>");
 
 // on status changed listener
 chrome.runtime.onMessage.addListener(
@@ -105,6 +106,14 @@ chrome.runtime.onMessage.addListener(
                 $(".xpathor-preview-edit", $(pre_block)).unbind("click");
                 $(".xpathor-preview-newslist-btn", $(pre_block)).unbind("click");
             });
+        } else if (request.name == "peep_blocks") {
+            // TODO peep blocks
+            console.log("peep blocks in main");
+            $("#xpathor_peep_blocks").attr("used", "true");
+        } else if (request.name == "stop_peep_blocks"){
+            // TODO stop peep blocks
+            console.log("stop peep blocks in main");
+            $("#xpathor_peep_blocks").attr("used", "false");
         } else if (request.name == "template_exists"){
             // whether template already exists, called by popup
             var response = {success: true};
@@ -117,6 +126,7 @@ chrome.runtime.onMessage.addListener(
                 response.type = type;
             }
             response.previewing = $("div[class='xpathor-preview-block'][used='true']").length > 0;
+            response.peeping = $("div[id='xpathor_peep_blocks'][used='true']").length > 0;
             response.changed = TemplateManager.changed;
             sendResponse(response);
             return;
