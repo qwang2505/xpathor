@@ -10,7 +10,6 @@ var _content_type = null;
 // });
 
 $("body").append("<div class='xpathor-selection-2'></div>");
-$("body").append("<div id='xpathor_peep_blocks'></div>");
 
 // on status changed listener
 chrome.runtime.onMessage.addListener(
@@ -87,7 +86,7 @@ chrome.runtime.onMessage.addListener(
                 return;
             }
             console.log(template);
-            processor._preview_by_templates(template);
+            processor.preview_by_templates(template);
             console.log("preview block from portal in main.js");
         } else if (request.name == "stop_preview_blocks") {
             $(".xpathor-preview-block").each(function(){
@@ -109,11 +108,23 @@ chrome.runtime.onMessage.addListener(
         } else if (request.name == "peep_blocks") {
             // TODO peep blocks
             console.log("peep blocks in main");
-            $("#xpathor_peep_blocks").attr("used", "true");
+            if ("portal_processor" in _processors){
+                processor = _processors["portal_processor"];
+            } else {
+                processor = new PortalProcessor();
+                _processors["portal_processor"] = processor;
+            }
+            var template = TemplateManager.template;
+            if (template == null || template == undefined){
+                console.log("no template in TemplateManager while preview blocks");
+                return;
+            }
+            processor.peep_blocks(template);
+            console.log("peep block from portal in main.js");
         } else if (request.name == "stop_peep_blocks"){
             // TODO stop peep blocks
             console.log("stop peep blocks in main");
-            $("#xpathor_peep_blocks").attr("used", "false");
+
         } else if (request.name == "template_exists"){
             // whether template already exists, called by popup
             var response = {success: true};

@@ -86,3 +86,26 @@ jQuery.fn.tail = function(){
 	}
 	return next.wholeText == null ? "" : next.wholeText;
 }
+
+var _top_domains = ["com", "edu", "gov", "int", "mil", "net", "org", "biz", 
+	"info", "pro", "name", "museum", "coop", "aero", "idv", "xxx"];
+
+function get_top_domain(){
+	var url = window.location.href;
+	var domain = url.split("://")[1].split("/")[0];
+	var domain_frags = domain.split(".");
+	var top_domain = domain;
+	while (domain_frags.length >= 2){
+		if (domain_frags.length == 2 && _top_domains.indexOf(domain_frags[0]) != -1){
+			break;
+		}
+		var temp = domain_frags.join(".");
+		if (temp == domain){
+			domain_frags = domain_frags.slice(1);
+			continue;
+		}
+		top_domain = temp;
+		domain_frags = domain_frags.slice(1);
+	}
+	return top_domain;
+}

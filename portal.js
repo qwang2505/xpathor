@@ -221,7 +221,7 @@ var PortalProcessor = Processor.extend({
 		//XpathorStorage.save_portal_template(message.blocks);
 		TemplateManager.add_blocks(message.blocks);
 		// preview result
-		this._preview_by_templates(message);
+		this.preview_by_templates(message);
 	},
 
 	// extract result by portal template blocks
@@ -238,10 +238,12 @@ var PortalProcessor = Processor.extend({
 					console.log("extract block elements failed by template");
 					console.log(err);
 					console.log(template.block);
+					blocks[i].invalid = true;
 					continue;
 				}
 				if (elements == null || elements.length < template.index){
 					console.log("[Portal] Error when extract by template: block index out of range");
+					blocks[i].invalid = true;
 					continue;
 				}
 				block = elements[template.index];
@@ -253,6 +255,7 @@ var PortalProcessor = Processor.extend({
 						console.log("extract headline failed by template");
 						console.log(err);
 						console.log(template.headline);
+						blocks[i].invalid = true;
 						continue;
 					}
 					headlines = headlines == null ? [] : headlines;
@@ -265,6 +268,7 @@ var PortalProcessor = Processor.extend({
 						console.log("extract normal news failed by template");
 						console.log(err);
 						console.log(template.news);
+						blocks[i].invalid = true;
 						continue;
 					}
 					news = news == null ? [] : news;
@@ -316,6 +320,9 @@ var PortalProcessor = Processor.extend({
 					result.push(item);
 					urls.push(item.url);
 				}
+				if (result.length == 0){
+					blocks[i].invalid = true;
+				}
 				results.push({block: block, category: template.category, blockId: template.id, newslist: result});
 			} catch (err) {
 				console.log("extract failed by template");
@@ -328,7 +335,7 @@ var PortalProcessor = Processor.extend({
 
 	preview: function(){
 		// get template from local storage
-		XpathorStorage.load_temp_template(document.location.host, "news", this._preview_by_templates, this);
+		XpathorStorage.load_temp_template(document.location.host, "news", this.preview_by_templates, this);
 	},
 
 	preview_block: function(template, block_id){
@@ -360,7 +367,7 @@ var PortalProcessor = Processor.extend({
 		this._preview_block(extract_result, block);
 	},
 
-	_preview_by_templates: function(result){
+	preview_by_templates: function(result){
 		var blocks = result.blocks;
 		// create preview element and show result.
 		if (this._preview_elem == null && $("#xpathor-preview").length === 0){
@@ -637,7 +644,7 @@ var PortalProcessor = Processor.extend({
         $("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
         // then, preview by new template
         var template = TemplateManager.get_block(block_id);
-        this._preview_by_templates({blocks: [template]})
+        this.preview_by_templates({blocks: [template]})
 	},
 
 	// start to extracting and generating xpath
@@ -810,5 +817,14 @@ var PortalProcessor = Processor.extend({
             callback.call(obj, message);
             return false;
         });
+    },
+
+
+    // peep blocks, show peep dialog, contains all the templates
+    peep_blocks: function(template){
+    	// extract by template first, find out which blocks is used and which is not.
+		this._extract(template.blocks);
+    	// show dialog to display all the blocks.
+    	console.log(template);
     },
 });

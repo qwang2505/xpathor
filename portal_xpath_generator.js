@@ -97,7 +97,7 @@ var BlockXpathGenerator = XpathGenerator.extend({
             return "//" + xpath;
         }
         // get xpath by parents
-        xpath = this.get_xpath_by_parents(element);
+        xpath = this._get_xpath_by_parents(element);
         if (xpath.length > 0){
             return "//" + xpath;
         }
