@@ -457,3 +457,52 @@ a.xpathor-validate-boxclose{
 .xpathor-validate-boxclose:before {
     content: "×";
 }
+
+.xpathor-peep-block {
+	z-index: 9999999999 !important;
+	background-color: #ccc;
+	background: -webkit-gradient(linear, left top, right top, from(#dddddd),color-stop(0.25, #cccccc), color-stop(0.5, #dddddd), color-stop(0.75, #cccccc), to(#dddddd));
+	border-radius: 10px;
+	position: fixed;
+	top: 50px;
+	left: 50px;
+	min-width: 250px;
+	min-height: 50px;
+	font-family: Tahoma;
+	visibility: hidden;
+	text-align: left;
+	padding-bottom: 30px;
+	transition: opacity 1s, visibility 1s;
+}
+.xpathor-peep-block.xpathor-peep-show {
+	visibility: visible !important;
+	opacity: 1 !important;
+}
+a.xpathor-peep-boxclose{
+    float:right;
+    margin-top:5px;
+    margin-right:5px;
+    cursor:pointer;
+    color: #fff;
+    border: 1px solid #AEAEAE;
+    border-radius: 10px;
+    background: #605F61;
+    font-size: 31px;
+    font-weight: bold;
+    display: inline-block;
+    line-height: 0px;
+    padding: 11px 3px;
+}
+.xpathor-peep-boxclose:before {
+    content: "×";
+}
+
+.xpathor-peep-templates {
+	margin-top: 45px;
+	font-size: 16px;
+    font-weight: bold;
+    font-family: Tahoma;
+    padding-left: 10px;
+    padding-right: 10px;
+    overflow-y: auto;
+}

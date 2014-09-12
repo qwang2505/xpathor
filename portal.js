@@ -1,12 +1,18 @@
+// dragging element
+var _dragging_elem = null;
+var _delta_x = 0;
+var _delta_y = 0;
+
 /*
  * NewsProcessor, to process news extracting.
  */
-
 var PortalProcessor = Processor.extend({
 
 	name: "portal",
 
 	message: null,
+
+	_dragging_elem: null,
 
 	_tip_elem: null,
 	_preview_elem: null,
@@ -338,7 +344,7 @@ var PortalProcessor = Processor.extend({
 		XpathorStorage.load_temp_template(document.location.host, "news", this.preview_by_templates, this);
 	},
 
-	preview_block: function(template, block_id){
+	preview_seed: function(template, block_id){
 		var blocks = template.blocks;
 		var block = null;
 		for (var i=0; i < blocks.length; i++){
@@ -819,6 +825,85 @@ var PortalProcessor = Processor.extend({
         });
     },
 
+    // get peep div. If no available, create one
+	_get_peep_div: function(){
+		var elems = $("div[class='xpathor-peep-block']");
+		if (elems.length > 0){
+			return elems[0];
+		}
+		$("body").mousemove(function(event){
+			if (_dragging_elem != null){
+				$(_dragging_elem).css("top", event.clientY + _delta_y);
+				$(_dragging_elem).css("left", event.clientX + _delta_x);
+			}
+		});
+		$("body").append("<div class='xpathor-peep-block'><a class=\"xpathor-peep-boxclose\" " +
+						"id=\"xpathor-peep-boxclose\"></a><div class=\"xpathor-peep-templates\" " +
+						"id=\"xpathor-peep-templates\">some thing</div></div>");
+		$(".xpathor-peep-block").mousedown(function(event){
+			$(this).css("cursor", "move");
+			_dragging_elem = $(this);
+			var p = $(this).position();
+			_delta_y = p.top - event.clientY;
+			_delta_x = p.left - event.clientX;
+		});
+		$(".xpathor-peep-block").mouseup(function(event){
+			$(this).css("cursor", "auto");
+			_dragging_elem = null;
+		});
+		var elems = $("div[class='xpathor-peep-block']");
+		if (elems.length > 0){
+			return elems[0];
+		}
+		console.log("Error: create preview block failed");
+	},
+
+	preview_block: function(template, block_id, obj){
+		var blocks = template.blocks;
+		var block = null;
+		for (var i=0; i < blocks.length; i++){
+			if (blocks[i].id == block_id){
+				block = blocks[i];
+				break;
+			}
+		}
+		if (block == null){
+			console.log("Error: can not find block by id: " + block_id);
+			return;
+		}
+
+		// create preview element and show result.
+		if (obj._preview_elem == null && $("#xpathor-preview").length === 0){
+			// create preview element
+			// TODO need a close button?
+			$("body").append("<div class='xpathor-preview' id='xpathor-preview'>" + 
+				"<div class='xpathor-preview-news-list' id='xpathor-preview-news-list'></div></div>");
+			obj._preview_elem = $("#xpathor-preview");
+		} else if (this._preview_elem == null){
+			obj._preview_elem = $("#xpathor-preview");
+		}
+		// extract result by blocks
+		var extract_result = obj._extract([block]);
+		// generate html by result
+		obj._preview(extract_result, obj);
+		$(window).scrollTop($(extract_result[0].block).position().top);
+	},
+
+	stop_preview_block: function(template, block_id, obj){
+		var pre_block = $("div[xpathor_block_id='" + block_id + "']");
+        $(pre_block).css({left: 0, top: 0, width: 0, height: 0, display: "none"});
+        $(pre_block).attr("used", "false");
+        $(pre_block).attr("xpathor_block_id", "");
+        $(".xpathor-preview-news", $("*[xpathor_preview_block_id=\"" + block_id + "\"]")).each(function(){
+            $(this).removeClass("xpathor-preview-news");
+        });
+        $("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
+        // remove button listeners
+        $(".xpathor-preview-hide", $(pre_block)).unbind("click");
+        $(".xpathor-preview-delete", $(pre_block)).unbind("click");
+        $(".xpathor-preview-edit", $(pre_block)).unbind("click");
+        $(".xpathor-preview-newslist-btn", $(pre_block)).unbind("click");
+	},
 
     // peep blocks, show peep dialog, contains all the templates
     peep_blocks: function(template){
@@ -826,5 +911,44 @@ var PortalProcessor = Processor.extend({
 		this._extract(template.blocks);
     	// show dialog to display all the blocks.
     	console.log(template);
+    	var elem = this._get_peep_div();
+    	var html = "<table border='1'>";
+    	for (var i=0; i < template.blocks.length; i++){
+    		var block = template.blocks[i];
+    		var id = block.id;
+    		if (block.invalid){
+    			html += "<tr><td width='65%' style='color:red; padding: 3px'>" + id + "</td>" +
+    				"<td><input type='button' style='margin: 3px' block_id='" + id + "'" + 
+    				"class=\"xpathor-dialog-button\" action='delete' value='Delete'></td></tr>";
+    		} else {
+    			html += "<tr><td width='65%' style='color:green; padding: 3px'>" + id + "</td>" +
+    				"<td><input type='button' style='margin: 3px' block_id='" + id + "'" +
+    				"class=\"xpathor-dialog-button\" action='preview' value='Preview' previewing='false'></td></tr>";
+    		}
+    	}
+    	html += "</table>";
+    	var templates_elem = $("#xpathor-peep-templates");
+    	templates_elem.html(html);
+    	templates_elem.css("max-height", ($(window).height() - 150) + "px");
+    	var obj = this;
+    	$("#xpathor-peep-templates input[class='xpathor-dialog-button'][action='preview']").each(function(){
+    		$(this).click(function(){
+    			var previewing = $(this).attr("previewing");
+    			if (previewing == "true"){
+    				// pass
+    				var block_id = $(this).attr("block_id");
+    				obj.stop_preview_block(template, block_id, obj);
+    				$(this).attr("previewing", "false");
+    				$(this).val("Preview");
+    			} else {
+    				// Stop preview first
+    				var block_id = $(this).attr("block_id");
+    				obj.preview_block(template, block_id, obj);
+    				$(this).attr("previewing", "true");
+    				$(this).val("Stop");
+    			}
+    		});
+    	});
+    	$(elem).toggleClass("xpathor-peep-show");
     },
 });

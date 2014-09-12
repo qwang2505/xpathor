@@ -64,7 +64,7 @@ chrome.runtime.onMessage.addListener(
             try {
                 var template = request.message.template;
                 var block_id = request.message.blockID;
-                processor.preview_block(template, block_id);
+                processor.preview_seed(template, block_id);
                 response.success = true;
                 console.log("preview block from portal in main.js");
             } catch (err){
