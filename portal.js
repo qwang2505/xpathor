@@ -1,8 +1,3 @@
-// dragging element
-var _dragging_elem = null;
-var _delta_x = 0;
-var _delta_y = 0;
-
 /*
  * NewsProcessor, to process news extracting.
  */
@@ -940,11 +935,11 @@ var PortalProcessor = Processor.extend({
     		var block = template.blocks[i];
     		var id = block.id;
     		if (block.invalid){
-    			html += "<tr><td width='65%' style='color:red; padding: 3px'>" + id + "</td>" +
+    			html += "<tr><td width='65%' style='color:red; padding: 3px; cursor: pointer;'>" + id + "</td>" +
     				"<td><input type='button' style='margin: 3px' block_id='" + id + "'" + 
     				"class=\"xpathor-dialog-button\" action='delete' value='Delete'></td></tr>";
     		} else {
-    			html += "<tr><td width='65%' style='color:green; padding: 3px'>" + id + "</td>" +
+    			html += "<tr><td width='65%' style='color:green; padding: 3px; cursor: pointer;'>" + id + "</td>" +
     				"<td><input type='button' style='margin: 3px' block_id='" + id + "'" +
     				"class=\"xpathor-dialog-button\" action='preview' value='Preview' previewing='false'></td></tr>";
     		}
@@ -954,6 +949,13 @@ var PortalProcessor = Processor.extend({
     	templates_elem.html(html);
     	templates_elem.css("max-height", ($(window).height() - 150) + "px");
     	var obj = this;
+    	$("#xpathor-peep-templates td[width='65%']").each(function(){
+    		$(this).click(function(){
+    			var block_id = $(this).text();
+    			obj._create_edit_dialog(block_id, obj);
+    			$("#xpathor_edit_dialog").toggleClass("xpathor-dialog-show");
+    		});
+    	});
     	$("#xpathor-peep-templates input[class='xpathor-dialog-button'][action='preview']").each(function(){
     		$(this).click(function(){
     			var previewing = $(this).attr("previewing");
@@ -970,6 +972,14 @@ var PortalProcessor = Processor.extend({
     				$(this).attr("previewing", "true");
     				$(this).val("Stop");
     			}
+    		});
+    	});
+    	$("#xpathor-peep-templates input[class='xpathor-dialog-button'][action='delete']").each(function(){
+    		$(this).click(function(){
+    			var block_id = $(this).attr("block_id");
+    			TemplateManager.delete_block(block_id);
+    			$(this).unbind("click");
+    			$(this).parent().parent().remove();
     		});
     	});
     	$(".xpathor-peep-block").attr("peeping", "true");

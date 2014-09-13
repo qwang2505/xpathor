@@ -109,3 +109,8 @@ function get_top_domain(){
 	}
 	return top_domain;
 }
+
+// dragging element
+var _dragging_elem = null;
+var _delta_x = 0;
+var _delta_y = 0;
