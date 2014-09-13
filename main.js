@@ -124,7 +124,14 @@ chrome.runtime.onMessage.addListener(
         } else if (request.name == "stop_peep_blocks"){
             // TODO stop peep blocks
             console.log("stop peep blocks in main");
-
+            if ("portal_processor" in _processors){
+                processor = _processors["portal_processor"];
+            } else {
+                processor = new PortalProcessor();
+                _processors["portal_processor"] = processor;
+            }
+            processor.stop_peep_blocks();
+            console.log("stop peep block from portal in main.js");
         } else if (request.name == "template_exists"){
             // whether template already exists, called by popup
             var response = {success: true};
@@ -137,8 +144,9 @@ chrome.runtime.onMessage.addListener(
                 response.type = type;
             }
             response.previewing = $("div[class='xpathor-preview-block'][used='true']").length > 0;
-            response.peeping = $("div[id='xpathor_peep_blocks'][used='true']").length > 0;
+            response.peeping = $("div[peeping='true']").length > 0;
             response.changed = TemplateManager.changed;
+            console.log(response);
             sendResponse(response);
             return;
         } else if (request.name == "get_template"){

@@ -472,7 +472,6 @@ a.xpathor-validate-boxclose{
 	visibility: hidden;
 	text-align: left;
 	padding-bottom: 30px;
-	transition: opacity 1s, visibility 1s;
 }
 .xpathor-peep-block.xpathor-peep-show {
 	visibility: visible !important;

@@ -653,6 +653,25 @@ var PortalProcessor = Processor.extend({
         this.preview_by_templates({blocks: [template]})
 	},
 
+	stop_preview_blocks: function(){
+		$(".xpathor-preview-block").each(function(){
+        	var pre_block = $(this);
+        	var block_id = $(pre_block).attr("xpathor_block_id");
+        	$(pre_block).css({left: 0, top: 0, width: 0, height: 0, display: "none"});
+            $(pre_block).attr("used", "false");
+            $(pre_block).attr("xpathor_block_id", "");
+            $(".xpathor-preview-news", $("*[xpathor_preview_block_id=\"" + block_id + "\"]")).each(function(){
+                $(this).removeClass("xpathor-preview-news");
+            });
+            $("*[xpathor_preview_block_id=\"" + block_id + "\"]").attr("xpathor_preview_block_id", "");
+            // remove button listeners
+            $(".xpathor-preview-hide", $(pre_block)).unbind("click");
+            $(".xpathor-preview-delete", $(pre_block)).unbind("click");
+            $(".xpathor-preview-edit", $(pre_block)).unbind("click");
+            $(".xpathor-preview-newslist-btn", $(pre_block)).unbind("click");
+        });
+	},
+
 	// start to extracting and generating xpath
 	start: function(){
 		this.pre_process();
@@ -837,7 +856,7 @@ var PortalProcessor = Processor.extend({
 				$(_dragging_elem).css("left", event.clientX + _delta_x);
 			}
 		});
-		$("body").append("<div class='xpathor-peep-block'><a class=\"xpathor-peep-boxclose\" " +
+		$("body").append("<div class='xpathor-peep-block' peeping='false'><a class=\"xpathor-peep-boxclose\" " +
 						"id=\"xpathor-peep-boxclose\"></a><div class=\"xpathor-peep-templates\" " +
 						"id=\"xpathor-peep-templates\">some thing</div></div>");
 		$(".xpathor-peep-block").mousedown(function(event){
@@ -850,6 +869,10 @@ var PortalProcessor = Processor.extend({
 		$(".xpathor-peep-block").mouseup(function(event){
 			$(this).css("cursor", "auto");
 			_dragging_elem = null;
+		});
+		var obj = this;
+		$("#xpathor-peep-boxclose").click(function(){
+			obj.stop_peep_blocks();
 		});
 		var elems = $("div[class='xpathor-peep-block']");
 		if (elems.length > 0){
@@ -949,6 +972,17 @@ var PortalProcessor = Processor.extend({
     			}
     		});
     	});
+    	$(".xpathor-peep-block").attr("peeping", "true");
     	$(elem).toggleClass("xpathor-peep-show");
+    },
+
+    stop_peep_blocks: function(){
+		this.stop_preview_blocks();
+    	$(".xpathor-peep-block").toggleClass("xpathor-peep-show");
+    	$(".xpathor-peep-block").attr("peeping", "false");
+    	$("#xpathor-peep-templates input[class='xpathor-dialog-button'][action='preview']").each(function(){
+    		$(this).unbind("click");
+    	});
+    	$("#xpathor-peep-templates").html("");
     },
 });

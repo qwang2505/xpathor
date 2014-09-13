@@ -81,7 +81,7 @@ var ReliableXpathGenerator = XpathGenerator.extend({
             for (var i=0; i < new_ids.length; i++){
                 if (new_ids[i].length == 0) {
                     continue;                    
-                }               
+                }
                 var new_id = new_ids[i];
                 if (id.length != new_id.length){
                     // fixed
