@@ -845,12 +845,6 @@ var PortalProcessor = Processor.extend({
 		if (elems.length > 0){
 			return elems[0];
 		}
-		$("body").mousemove(function(event){
-			if (_dragging_elem != null){
-				$(_dragging_elem).css("top", event.clientY + _delta_y);
-				$(_dragging_elem).css("left", event.clientX + _delta_x);
-			}
-		});
 		$("body").append("<div class='xpathor-peep-block' peeping='false'><a class=\"xpathor-peep-boxclose\" " +
 						"id=\"xpathor-peep-boxclose\"></a><div class=\"xpathor-peep-templates\" " +
 						"id=\"xpathor-peep-templates\">some thing</div></div>");

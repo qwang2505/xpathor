@@ -114,3 +114,11 @@ function get_top_domain(){
 var _dragging_elem = null;
 var _delta_x = 0;
 var _delta_y = 0;
+
+// make dragging element movable
+$("body").mousemove(function(event){
+	if (_dragging_elem != null){
+		$(_dragging_elem).css("top", event.clientY + _delta_y);
+		$(_dragging_elem).css("left", event.clientX + _delta_x);
+	}
+});

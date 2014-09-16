@@ -350,6 +350,18 @@ var NewsProcessor = Processor.extend({
 		$("#xpathor-preview-news-nextpage", this._preview_elem).html(result.nextPage);
 		$("#xpathor-preview-news-content", this._preview_elem).html(result.content);
 		setTimeout(function(){$("#xpathor-preview").toggleClass("preview-show")}, 0);
+		// make preview block movable
+		$("#xpathor-preview").mousedown(function(event){
+			$(this).css("cursor", "move");
+			_dragging_elem = $(this);
+			var p = $(this).position();
+			_delta_y = p.top - event.clientY;
+			_delta_x = p.left - event.clientX;
+		});
+		$("#xpathor-preview").mouseup(function(event){
+			$(this).css("cursor", "auto");
+			_dragging_elem = null;
+		});
 		return;
 	},
 });
