@@ -275,9 +275,9 @@ var NewsProcessor = Processor.extend({
 		result.source = NewsDetailExtractor.extract_source(result.source);
 		//console.log("[News] get source: " + result.source);
 		result.pubDate = XpathEvaluator.evaluate(document, template.pubDate);
-		console.log("original pub date: " + result.pubDate);
+		//console.log("original pub date: " + result.pubDate);
 		result.pubDate = NewsDetailExtractor.extract_time(result.pubDate);
-		console.log("[News] get publish date: " + result.pubDate);
+		//console.log("[News] get publish date: " + result.pubDate);
 		result.nextPage = XpathEvaluator.evaluate(document, template.nextPage);
 		//console.log("[News] get next page: " + result.nextPage);
 		return result;
@@ -299,23 +299,40 @@ var NewsProcessor = Processor.extend({
 
 	// preview extracting result
 	preview: function(templates){
-		// preview result by templates list
-		var result = null;
+		// extract by templates and collect valid result 
+		var results = [];
 		for (var i=0; i < templates.length; i++){
 			try{
-				result = this.extract(templates[i]);	
+				var result = this.extract(templates[i]);
 			} catch (err){
 				console.log("error extract use template: ");
 				console.log(templates[i]);
 				continue;
 			}
 			if (result.valid()){
-				console.log("preview result");
-				console.log(result);
-				this._preview(result);
-				break;
+				results.push(result);
 			}
 		}
+		if (results.length == 0){
+			console.log("can not extract valid result by templates:");
+			console.log(templates);
+			return;
+		}
+		// select best result by compare results
+		var best = null;
+		for (var i=0; i < results.length; i++){
+			if (best == null){
+				best = results[i];
+			} else if (best.better_result(results[i])){
+				best = results[i];
+			}
+		}
+		if (best == null){
+			console.log("Oops! can not find best result, something must be wrong!");
+			return;
+		}
+		// preview the best result
+		this._preview(best);
 	},
 
 	// preview extract result, put result in new div and show if need to.

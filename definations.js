@@ -24,6 +24,24 @@ Array.prototype.index = function(elem){
 // global var
 var NOT_SET = "NOT_SET";
 
+function _empty(value){
+	if (value == undefined || value == null){
+		return true;
+	} else if (typeof(value) == "number"){
+		return false;
+	} else if (typeof(value) == "string"){
+		value = value.trim();
+		// if value is string, zero length means empty
+		return value.length == 0;
+	} else if (typeof(value) == "object" && value.length != undefined){
+		return value.length == 0;
+	} else {
+		console.log("Unknow situation in _empty: ");
+		console.log(value);
+		return false;
+	}
+}
+
 /*
  * Extract result.
  */
@@ -37,7 +55,24 @@ var ExtractResult = Class.extend({
 
 	valid: function(){
 		// whether this extract result is valid
-		return this.title != null && this.content != null;
+		return this.title != null && this.content != null && this.title.length > 0;
+	},
+
+	// whether the new result is better than this one.
+	better_result: function(new_result){
+		// all result have already been validated
+		// TODO select better result by content too
+		if (_empty(this.images) && !_empty(new_result.images)){
+			return true;
+		} else if (_empty(this.nextPage) && !_empty(new_result.nextPage)){
+			return true;
+		} else if (_empty(this.source) && !_empty(new_result.source)){
+			return true;
+		} else if (_empty(this.pubDate) && !_empty(new_result.pubDate)){
+			return true;
+		} else {
+			return false;
+		}
 	},
 });
 
