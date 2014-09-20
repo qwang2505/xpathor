@@ -129,7 +129,7 @@ var NewsProcessor = Processor.extend({
             $(event.target).removeClass("xpathor-selection");
             var item_name = message.item;
             var obj = message.obj;
-            message.data[item_name] = NOT_SET;
+            message.data[item_name] = "";
             callback.call(obj, message);
             return false;
         });
@@ -275,8 +275,9 @@ var NewsProcessor = Processor.extend({
 		result.source = NewsDetailExtractor.extract_source(result.source);
 		//console.log("[News] get source: " + result.source);
 		result.pubDate = XpathEvaluator.evaluate(document, template.pubDate);
+		console.log("original pub date: " + result.pubDate);
 		result.pubDate = NewsDetailExtractor.extract_time(result.pubDate);
-		//console.log("[News] get publish date: " + result.pubDate);
+		console.log("[News] get publish date: " + result.pubDate);
 		result.nextPage = XpathEvaluator.evaluate(document, template.nextPage);
 		//console.log("[News] get next page: " + result.nextPage);
 		return result;

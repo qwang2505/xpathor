@@ -20,7 +20,8 @@ var NewsDetailExtractor = {
 
 	// regex to extract source
 	// TODO copy from python code, just contains chinese, so maybe need to improve
-	_source_re: /.*(?:\u7a3f\u6e90|\u6765\u6E90\u4E8E\uFF1A|\u6765\u81ea\uFF1A|\u6765\u81ea|\u6765\u6E90|\u6765\u6E90\uFF1A|\u51fa\u5904\uFF1A|\u6765\u6e90\u4e8e)[\s\xa0]*(?:\:|\uff1a|\/)?(?:\s\xa0)*(.*?)[\u8D5E\u3010\u3000 -_\|\s\xa0].*/i,
+	// ?: inside () means do not catch the match
+	_source_re: /.*(?:\u7a3f\u6e90|\u6765\u6E90\u4E8E\uFF1A|\u6765\u81ea\uFF1A|\u6765\u81ea|\u6765\u6E90|\u6765\u6E90\uFF1A|\u51fa\u5904\uFF1A|\u6765\u6e90\u4e8e)[\u21B5\s\xa0]*(?:\:|\uff1a|\/)?[\u21B5\s\xa0]*(.*?)[\u21B5\u8D5E\u3010\u3000 -_\|\s\xa0\n\r\t].*/i,
 
 	_img_placeholder_re: /(\(dolphinimagestart\-\-.*?\-\-dolphinimageend\))/gi,
 	_img_placeholder_re_no_match: /\(dolphinimagestart\-\-.*?\-\-dolphinimageend\)/gi,
@@ -395,10 +396,11 @@ var NewsDetailExtractor = {
 		if (text == null || text == undefined){
 			return "";
 		}
-		text = text.replace(/[\n\r\t]/gi, "");
-		text = text.replace(/( ){2,}/gi, "");
+		text = text.replace(/[\n\r\t]{2,}/gi, "\n");
+		text = text.replace(/( ){2,}/gi, " ");
 		text += " ";
 		var match = this._source_re.exec(text);
+		console.log(match);
 		if (match == null){
 			return null;
 		} else {
@@ -417,14 +419,18 @@ var NewsDetailExtractor = {
 		for (var i=0; i < res.length; i++){
 			match = res[i].exec(text);
 			if (match != null){
-				return new Date(match[1], match[2] - 1, match[3], match[4], match[5], match[6] * 1000);
+				console.log("match all");
+				console.log(match);
+				return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]), parseInt(match[4]), 
+					parseInt(match[5]), parseInt(match[6]));
 			}
 		}
 		res = this._time_res.no_second;
 		for (var i=0; i < res.length; i++){
 			match = res[i].exec(text);
 			if (match != null){
-				return new Date(match[1], match[2] - 1, match[3], match[4], match[5], 0);
+				return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]), parseInt(match[4]), 
+					parseInt(match[5]), 0);
 			}
 		}
 		res = this._time_res.no_year_second;
@@ -432,7 +438,8 @@ var NewsDetailExtractor = {
 			match = res[i].exec(text);
 			if (match != null){
 				var now = new Date();
-				return new Date(now.getFullYear(), match[1] - 1, match[2], match[3], match[4], 0);
+				return new Date(now.getFullYear(), parseInt(match[1]) - 1, parseInt(match[2]), parseInt(match[3]), 
+					parseInt(match[4]), 0);
 			}
 		}
 		res = this._time_res.no_time;
@@ -440,9 +447,10 @@ var NewsDetailExtractor = {
 			match = res[i].exec(text);
 			if (match != null){
 				var now = new Date();
-				return new Date(match[1], match[2] - 1, match[3], now.getHours(), now.getMinutes(), 0);
+				return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]), now.getHours(), now.getMinutes(), 0);
 			}
 		}
+		console.log("[NewsDetailExtractor] can not get time from: " + text);
 		var now = new Date();
 		return now;
 	},

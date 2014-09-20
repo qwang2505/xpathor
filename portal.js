@@ -50,9 +50,11 @@ var PortalProcessor = Processor.extend({
 						'<option value="6">Sport</option><option value="7">Finance</option><option value="12">Other</option>' +
 						'<option value="8">Technology</option><option value="9">Military</option><option value="11">History</option>' +
 						'<option value="10">Auto</option><option value="13">Life</option><option value="15">Humor</option><option value="20">Fashion</option>' + 
-						'<option value="18">Politics</option><option value="24">Law</option><option value="27">Beauty</option>' + 
-						'<option value="35">Health</option><option value="38">Views</option>' +
-						'<option value="40">Emotion</option><option value="41">Food</option></select>',
+						'<option value="18">Politics</option><option value="19">Art & Culture</option><option value="24">Law</option><option value="27">Beauty</option>' + 
+						'<option value="26">Trevel</option><option value="30">Accident</option><option value="35">Health</option><option value="38">Views</option>' +
+						'<option value="40">Woman</option><option value="41">Famous & Star</option><option value="43">TV Series</option>' + 
+						'<option value="42">Game</option><option value="44">House</option></select>',
+						//'<option value="40">Emotion</option><option value="41">Food</option></select>',
 	_priority_selection: '<select class="xpathor-dialog-select"><option value="-1" selected>------</option><option value="8">P0</option>' +
 						 '<option value="0">P1</option><option value="4">P2</option></select>',
 
@@ -432,12 +434,24 @@ var PortalProcessor = Processor.extend({
 			">Hide</span><span class='xpathor-preview-newslist-btn'>NewsList</span></div>" + 
 			"<div class='xpathor-preview-category'></div><div class='xpathor-preview-newslist'></div></div>");
 		var elems = $("div[class='xpathor-preview-block'][used='false']");
+
 		if (elems.length > 0){
 			var elem = elems[0];
 			$(elem).attr("xpathor_block_id", block_id);
 			$("span", $(elem)).each(function(){
 				$(this).attr("xpathor_block_id", block_id);
 			});
+			$(elem).mousedown(function(event){
+				$(this).css("cursor", "move");
+				_dragging_elem = $(this);
+				var p = $(this).position();
+				_delta_y = p.top - event.clientY;
+				_delta_x = p.left - event.clientX;
+			});
+			$(elem).mouseup(function(event){
+				$(this).css("cursor", "auto");
+				_dragging_elem = null;
+			});	
 			return elem;
 		}
 		console.log("Error: create preview block failed");

@@ -9,7 +9,7 @@ var XpathEvaluator = {
     // attr ---> /@attr 
     // full text ---> /text_content()
     fill_xpath: function(ori, type, attr){
-        if (ori == "NOT_SET"){
+        if (ori == "NOT_SET" || ori.length == 0){
             return "";
         }
         if (type == "text"){

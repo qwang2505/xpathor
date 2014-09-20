@@ -211,6 +211,8 @@ function get_validate_news_dialog(){
 // popup validate news dialog to validate news list. 
 function validate_news(template, newslist){
     console.log("validate news");
+    console.log(template);
+    console.log(newslist);
     get_validate_news_dialog();
     var html = "<table cellspacing='0' border='1' width='95%'><tr><th width='80%'>Title</th><th width='20%'>Validate</th></tr>"
     // get dialog
@@ -241,5 +243,7 @@ function validate_news(template, newslist){
             });
         })
         $("#xpathor-validate-news-dialog").toggleClass("xpathor-dialog-show");
+    } else {
+        alert("can not extract news links from block, please try again.");
     }
 }

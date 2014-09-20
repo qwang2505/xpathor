@@ -183,12 +183,12 @@ var XpathGenerator = Class.extend({
     },
 
     /*
-     * Normalize element. If element only have on child, use child instead
+     * Normalize element. If element only have on div child, use child instead
      */
     _normalize_element: function(element){
         console.log("[Xpath] normalize element");
         var children = element.childNodes;
-        if (children.length == 1 && children[0].nodeType == 1){
+        if (children.length == 1 && children[0].nodeType == 1 && children[0].tagName == "DIV"){
             element = children[0];
         }
         return element;
