@@ -269,7 +269,12 @@ var NewsProcessor = Processor.extend({
 			}
 		}
 		result.content = XpathEvaluator.evaluate(document, template.content);
-		result.content = NewsDetailExtractor.extract_content(result.content, head_images);
+		if (result.content.length > 0){
+			result.content = result.content[0];
+		} else {
+			return result;
+		}
+		result.content = NewsDetailExtractor.extract_content(result.content, head_images, template);
 		//console.log("[News] get content node: " + result.content);
 		result.source = XpathEvaluator.evaluate(document, template.source);
 		result.source = NewsDetailExtractor.extract_source(result.source);

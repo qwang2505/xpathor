@@ -348,9 +348,26 @@ var NewsDetailExtractor = {
 		return content;
 	},
 
+	_clean_body: function(node, template){
+		if (template.removedTags != undefined && template.removedTags != null && template.removedTags.length > 0){
+			console.log("clean with template: " + template.removedTags);
+			var tags = template.removedTags.split("&");
+			for (var i=0; i < tags.length; i++){
+				var elems = $(node).xpath(".//" + tags[i]).toArray();
+				console.log("got elems with xpath: .//" + tags[i]);
+				console.log(elems);
+				for (var j=0; j < elems.length; j++){
+					$(elems[j]).remove();
+				}
+			}
+		}
+		return node;
+	},
+
 	// extract content from dom node, rewrite from python source
-	extract_content: function(node, head_images){
+	extract_content: function(node, head_images, template){
 		var clone = $(node).clone();
+		clone = this._clean_body(clone, template);
 		// extract images from content node
 		var pictures = ImageExtractor.extract_images(clone);
 		console.log("got " + pictures.length + " images from content node");

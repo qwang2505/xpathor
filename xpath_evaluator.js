@@ -29,6 +29,9 @@ var XpathEvaluator = {
         if (xpath == undefined || xpath == null || xpath == NOT_SET || xpath.length == 0){
             return null;
         }
+        if (xpath.indexOf("table") != -1){
+            xpath = xpath.replace("table", "table/tbody");
+        }
         if (this._is_text(xpath)){
             return this._extract_text(context, xpath);
         } else if (this._is_attr(xpath)){
