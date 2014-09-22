@@ -1,7 +1,7 @@
 
 function load_template(url){
     // load template in popup scripts
-    var api_path = Api.get_path("get") + "?lc=" + Api.get_locale() + "&type=portal&key=" + url;
+    var api_path = Api.get_path("get") + "?lc=" + Api.get_locale() + "&type=portal&key=" + escape(url);
     $.get(api_path, function(data){
         if (data['data'].length == 0){
             // new site, show extract links button
@@ -23,7 +23,7 @@ function load_template(url){
 }
 function load_detail_template(url){
     // load template in popup scripts
-    var api_path = Api.get_path("get") + "?lc=" + Api.get_locale() + "&type=news&key=" + url;
+    var api_path = Api.get_path("get") + "?lc=" + Api.get_locale() + "&type=news&key=" + escape(url);
     $.get(api_path, function(data){
         if (data['data'].length == 0){
             // new site, show extract links button
