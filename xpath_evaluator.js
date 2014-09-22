@@ -30,7 +30,7 @@ var XpathEvaluator = {
             return null;
         }
         if (xpath.indexOf("table") != -1){
-            xpath = xpath.replace("table", "table/tbody");
+            xpath = xpath.replace(/(table(\[.*?\])?\/)/, "$1tbody/");
         }
         if (this._is_text(xpath)){
             return this._extract_text(context, xpath);

@@ -239,13 +239,13 @@ var ReliableXpathGenerator = XpathGenerator.extend({
         var xpath = this._get_working_xpath(element, xpaths);
         // TODO verify xpaths
         if (xpath.length > 0){
-            return "//" + xpath;
+            return "//" + this._fix_table(xpath);
         }
         // get xpaths by parents
         xpaths = this._get_xpath_by_parents(element);
         xpath = this._get_working_xpath(element, xpaths);
         if (xpath.length > 0){
-            return "//" + xpath;
+            return "//" + this._fix_table(xpath);
         }
         // TODO get xpath by childdren
         // TODO get xpath by siblings

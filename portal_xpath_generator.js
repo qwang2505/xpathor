@@ -94,12 +94,12 @@ var BlockXpathGenerator = XpathGenerator.extend({
         // get xpath from current node, by id or class
         var xpath = this.get_node_xpath(element);
         if (xpath.length > 0){
-            return "//" + xpath;
+            return "//" + this._fix_table(xpath);
         }
         // get xpath by parents
         xpath = this._get_xpath_by_parents(element);
         if (xpath.length > 0){
-            return "//" + xpath;
+            return "//" + this._fix_table(xpath);
         }
         // TODO get xpath by childdren
         // TODO get xpath by siblings
@@ -156,12 +156,12 @@ var BlockXpathGenerator = XpathGenerator.extend({
                 var parent = element.parentNode;
                 var parent_tags = headline ? this._good_headline_parent_tags : this._good_news_parent_tags;
                 if (parent_tags.indexOf(parent.tagName) == -1){
-                    return this._get_news_xpath_by_parent(parent, block, "a", headline); 
+                    return this._fix_table(this._get_news_xpath_by_parent(parent, block, "a", headline)); 
                 } else {
                     if (parent.parentNode == block){
-                        return parent.tagName.toLowerCase() + "/" + "a";
+                        return this._fix_table(parent.tagName.toLowerCase() + "/" + "a");
                     } else {
-                        return ".//" + parent.tagName.toLowerCase() + "/" + "a";
+                        return this._fix_table(".//" + parent.tagName.toLowerCase() + "/" + "a");
                     }
                 }
             }
@@ -174,7 +174,7 @@ var BlockXpathGenerator = XpathGenerator.extend({
         }
         // get reletive xpath of parent and then add /a or //a to get news links
         var xpath = this._get_news_xpath_by_parent(element, block, "", headline);
-        return xpath + postfix;
+        return this._fix_table(xpath + postfix);
     },
 
     // get news xpaht by parent node, all tag names, do not use class or id in news xpath
@@ -300,7 +300,8 @@ var BlockXpathGenerator = XpathGenerator.extend({
         if (news_item_xpath.length > 0 && news_item_xpath != "NOT_SET"){
             var xpath = this.get_news_xpath(element, block, true);
             if (xpath.length > 0 && xpath != news_item_xpath && this._validate_headline_xpath(xpath, block, news_item)){
-                return xpath;
+                console.log("get headline xpath 1");
+                return this._fix_table(xpath);
             }
         }
         if (element.tagName == "A"){
@@ -316,13 +317,16 @@ var BlockXpathGenerator = XpathGenerator.extend({
                 var parent = element.parentNode;
                 if (this._good_headline_parent_tags.indexOf(parent.tagName) == -1){
                     // get by parent
-                    return this._get_headline_xpath_by_parent(parent, block, "a", news_item);
+                    console.log("get headline xpath 2");
+                    return this._fix_table(this._get_headline_xpath_by_parent(parent, block, "a", news_item));
                 } else {
-                    xpath = parent.tagName.toLowerCase() + "/a";
+                    xpath = ".//" + parent.tagName.toLowerCase() + "/a";
                     if (xpath != news_item_xpath){
-                        return xpath;
+                        console.log("get headline xpath 3");
+                        return this._fix_table(xpath);
                     } else {
-                        return this._get_headline_xpath_by_parent(parent, block, "a", news_item);
+                        console.log("get headline xpath 4");
+                        return this._fix_table(this._get_headline_xpath_by_parent(parent, block, "a", news_item));
                     }
                 }
             }
@@ -336,13 +340,15 @@ var BlockXpathGenerator = XpathGenerator.extend({
         // get reletive xpath of parent and then add /a or //a to get news links
         var xpath = this._get_headline_xpath_by_parent(element, block, "", news_item);
         if (xpath.length > 0){
-            return xpath + postfix;
+            console.log("get headline xpath 5");
+            return this._fix_table(xpath + postfix);
         } else if (news_item_xpath.length == 0 || news_item_xpath == "NOT_SET") {
             // failed to generate xpath for headline use attribute, and news item not selected, here
             // try again use tag names to generate xpath for headline 
             xpath = this.get_news_xpath(element, block, true);
             if (xpath.length > 0 && xpath != news_item_xpath && this._validate_headline_xpath(xpath, block, news_item)){
-                return xpath;
+                console.log("get headline xpath 6");
+                return this._fix_table(xpath);
             }
             return "";
         } else {

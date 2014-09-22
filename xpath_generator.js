@@ -59,7 +59,7 @@ var XpathGenerator = Class.extend({
             id > 1 ? (id = '[' + id + ']') : (id = '');
             xpath = '/' + element.tagName.toLowerCase() + id + xpath;
         }
-        return xpath;
+        return this._fix_table(xpath);
     },
 
     /*
@@ -195,6 +195,13 @@ var XpathGenerator = Class.extend({
     },
 
     /*
+     * Fix table problem
+     */
+    _fix_table: function(xpath){
+        return xpath.replace(/\/tbody(\[.*?\])?\//, "/");
+    },
+
+    /*
      * Get fixed xpath, described by id, class, as simple as possible, but can locate
      * the element with xpath
      */
@@ -203,12 +210,12 @@ var XpathGenerator = Class.extend({
         // get xpath from current node, by id or class
         var xpath = this.get_node_xpath(element);
         if (xpath.length > 0){
-            return "//" + xpath;
+            return "//" + this._fix_table(xpath);
         }
         // get xpath by parents
         xpath = this._get_xpath_by_parents(element);
         if (xpath.length > 0){
-            return "//" + xpath;
+            return "//" + this._fix_table(xpath);
         }
         // TODO get xpath by childdren
         // TODO get xpath by siblings
