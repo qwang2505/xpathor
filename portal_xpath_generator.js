@@ -62,16 +62,17 @@ var BlockXpathGenerator = XpathGenerator.extend({
      * Normalize element. If element only have on child, use child instead
      */
     normalize_element: function(element){
-        console.log("[Xpath] normalize element");
+        console.log("[Xpath] normalize element: ");
+        console.log(element);
         var children = element.childNodes;
-        if (children.length == 1 && children[0].nodeType == 1){
+        if (children.length == 1 && children[0].nodeType == 1 && children[0].tagName == "DIV"){
             return this.normalize_element(children[0]);
         }
         var non_empty_children = null;
         var one_valid_child = true;
         for (var i=0; i < children.length; i++){
             if ($(children[i]).children().length > 0){
-                if (non_empty_children == null){
+                if (non_empty_children == null && children[i].tagName == "DIV"){
                     non_empty_children = children[i];
                 } else {
                     one_valid_child = false;

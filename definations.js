@@ -62,6 +62,9 @@ var ExtractResult = Class.extend({
 	better_result: function(new_result){
 		// all result have already been validated
 		// TODO select better result by content too
+		console.log("compare results: ");
+		console.log(this);
+		console.log(new_result);
 		if (_empty(this.images) && !_empty(new_result.images)){
 			return true;
 		} else if (_empty(this.nextPage) && !_empty(new_result.nextPage)){

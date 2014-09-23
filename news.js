@@ -223,7 +223,7 @@ var NewsProcessor = Processor.extend({
 	fill_template: function(template){
 		template.domain = get_top_domain();
 		template.pattern = "";
-		template.title = XpathEvaluator.fill_xpath(template.title, "text");
+		template.title = XpathEvaluator.fill_xpath(template.title, "full_text");
 		template.source = XpathEvaluator.fill_xpath(template.source, "full_text");
 		template.pubDate = XpathEvaluator.fill_xpath(template.pubDate, "full_text");
 		template.nextPage = XpathEvaluator.fill_xpath(template.nextPage, "attr", "href");
@@ -306,15 +306,25 @@ var NewsProcessor = Processor.extend({
 	preview: function(templates){
 		// extract by templates and collect valid result 
 		var results = [];
+		console.log("templates: ");
+		console.log(templates);
 		for (var i=0; i < templates.length; i++){
 			try{
+				console.log("extract by template");
+				console.log(templates[i]);
 				var result = this.extract(templates[i]);
+				console.log("got result: ");
+				console.log(result);
 			} catch (err){
 				console.log("error extract use template: ");
 				console.log(templates[i]);
 				continue;
 			}
+			console.log("got invalid result: ");
+			console.log(result);
 			if (result.valid()){
+				console.log("got result: ");
+				console.log(result);
 				results.push(result);
 			}
 		}
@@ -329,6 +339,8 @@ var NewsProcessor = Processor.extend({
 			if (best == null){
 				best = results[i];
 			} else if (best.better_result(results[i])){
+				console.log("results better than best: ");
+				console.log(results[i]);
 				best = results[i];
 			}
 		}
@@ -336,6 +348,8 @@ var NewsProcessor = Processor.extend({
 			console.log("Oops! can not find best result, something must be wrong!");
 			return;
 		}
+		console.log("best result: ");
+		console.log(best);
 		// preview the best result
 		this._preview(best);
 	},
