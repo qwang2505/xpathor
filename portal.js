@@ -842,6 +842,12 @@ var PortalProcessor = Processor.extend({
             var obj = message.obj;
             message.data[item_name] = xpath;
             callback.call(obj, message);
+            //console.log("return false");
+            //event.preventDefault();
+            //event.stopPropagation();
+            //event.stopImmediatePropagation();
+            //if (event.cancelBubble!=null) event.cancelBubble = true;
+            //alert("event stopped");
             return false;
         });
         $(window).bind("contextmenu", function(event){
