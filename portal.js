@@ -809,10 +809,78 @@ var PortalProcessor = Processor.extend({
         	});
             return false;
         });
+    	$(window).keyup(function(event){
+    		var code1 = event.which;
+    		if (code1 != 13){
+    			return true;	
+    		}
+        	obj.stop_select();
+        	$(window).keyup(function(event){
+        		var code = event.which;
+        		if (code == 38){
+        			// press up
+        			var elem =  $(".xpathor-selection")[0];
+        			var parent = elem.parentNode;
+        			if (parent.tagName == "BODY"){
+        				return false;
+        			}
+        			console.log(elem);
+        			message.block_paths.push(elem);
+        			console.log(message.block_paths.length);
+        			$(elem).removeClass("xpathor-selection");
+        			$(parent).addClass("xpathor-selection");
+        			var p = $(parent).offset()
+            		$(".xpathor-selection-2").css({left: p.left, top: p.top, width: $(parent).width(), height: $(parent).height()});
+        			return false;
+        		} else if (code == 40){
+        			// press down
+        			if (message.block_paths.length == 0){
+        				return false;
+        			}
+        			var child = message.block_paths.pop();
+        			var elem =  $(".xpathor-selection")[0];
+        			$(elem).removeClass("xpathor-selection");
+        			$(child).addClass("xpathor-selection");
+        			var p = $(child).offset()
+            		$(".xpathor-selection-2").css({left: p.left, top: p.top, width: $(child).width(), height: $(child).height()});
+        			return false;
+        		} else if (code == 13){
+        			$(window).unbind("keyup");
+        			// press enter
+        			var elem =  $(".xpathor-selection")[0];
+        			var xpathor = new BlockXpathGenerator();
+        			xpath = xpathor.get_fixed_xpath(elem);
+	                message.block = xpathor.normalize_element(elem);
+	                // stop select and switch
+	                $(elem).removeClass("xpathor-selection");
+            		$(".xpathor-selection-2").css({left: 0, top: 0, width: 0, height: 0});
+	                // get to next step
+	                var item_name = message.item;
+            		var obj = message.obj;
+            		message.data[item_name] = xpath;
+            		message.block_paths = new Array();
+            		callback.call(obj, message);
+        			return false;
+        		} else if (code == 27){
+        			$(window).unbind("keyup");
+        			var elem =  $(".xpathor-selection")[0];
+	                // stop select and switch
+	                $(elem).removeClass("xpathor-selection");
+            		$(".xpathor-selection-2").css({left: 0, top: 0, width: 0, height: 0});
+        			// press esc, restart select block
+        			restart_callback.call(message.obj, message);
+        			return false;
+        		}
+        		return true;
+        	});
+            return false;
+        });
     },
 
     start_select: function(message, callback){
         $(window).mouseenter(function(event){
+        	// save selecting element
+        	message.selecting_elem = event.target;
             $(event.target).addClass("xpathor-selection");
         });
         $(window).mouseleave(function(event){
@@ -820,34 +888,21 @@ var PortalProcessor = Processor.extend({
         });
         $(window).click(function(event){
             $(event.target).removeClass("xpathor-selection");
-            //try {
-                // get xpath
-                var xpathor = new BlockXpathGenerator();
-                var xpath;
-                if (message.item == "news"){
-	            	var block = message.block;
-	                xpath = xpathor.get_news_xpath(event.target, block, false);	
-	                message.news = event.target;
-	            } else if (message.item == "headline"){
-	            	var block = message.block;
-	            	// TODO get headline xpath
-	                xpath = xpathor.get_headline_xpath(event.target, block, message.news, message.data.news);	
-	            }
-            //} catch (err) {
-            //    console.log(err.name + ": " + err.message);
-            //    return false;
-            //}
-            // TODO process xpath, pass to specific receiver
+            var xpathor = new BlockXpathGenerator();
+            var xpath;
+            if (message.item == "news"){
+            	var block = message.block;
+                xpath = xpathor.get_news_xpath(event.target, block, false);	
+                message.news = event.target;
+            } else if (message.item == "headline"){
+            	var block = message.block;
+            	// get headline xpath
+                xpath = xpathor.get_headline_xpath(event.target, block, message.news, message.data.news);	
+            }
             var item_name = message.item;
             var obj = message.obj;
             message.data[item_name] = xpath;
             callback.call(obj, message);
-            //console.log("return false");
-            //event.preventDefault();
-            //event.stopPropagation();
-            //event.stopImmediatePropagation();
-            //if (event.cancelBubble!=null) event.cancelBubble = true;
-            //alert("event stopped");
             return false;
         });
         $(window).bind("contextmenu", function(event){
@@ -858,6 +913,36 @@ var PortalProcessor = Processor.extend({
             callback.call(obj, message);
             return false;
         });
+        // add key enter listener to select element
+        $(window).keyup(function(event){
+    		var code = event.which;
+    		if (code == 13){
+    			// press enter, finish selecting
+    			var elem = message.selecting_elem;
+    			if (elem == undefined || elem == null){
+    				console.log("Error: not selecting anyone when press enter");
+    				return true;
+    			}
+	    		$(elem).removeClass("xpathor-selection");
+	            var xpathor = new BlockXpathGenerator();
+	            var xpath;
+	            if (message.item == "news"){
+	            	var block = message.block;
+	                xpath = xpathor.get_news_xpath(elem, block, false);	
+	                message.news = elem;
+	            } else if (message.item == "headline"){
+	            	var block = message.block;
+	            	// get headline xpath
+	                xpath = xpathor.get_headline_xpath(elem, block, message.news, message.data.news);	
+	            }
+	            var item_name = message.item;
+	            var obj = message.obj;
+	            message.data[item_name] = xpath;
+	            callback.call(obj, message);
+    			return false;
+    		}
+    		return true;
+    	});
     },
 
     // get peep div. If no available, create one

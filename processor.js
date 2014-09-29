@@ -22,6 +22,7 @@ var Processor = Class.extend({
         $(window).unbind("mouseleave");
         $(window).unbind("click");
         $(window).off("contextmenu");
+        $(window).unbind("keyup");
     },
     // start to select element with mouse
     start_select: function(message, callback){
@@ -33,15 +34,10 @@ var Processor = Class.extend({
         });
         $(window).click(function(event){
             $(event.target).removeClass("xpathor-selection");
-            //try {
-                // get xpath
-                var xpathor = new ReliableXpathGenerator();
-                var xpath = xpathor.get_fixed_xpath(event.target);
-            //} catch (err) {
-            //    console.log(err.name + ": " + err.message);
-            //    return false;
-            //}
-            // TODO process xpath, pass to specific receiver
+            // get xpath
+            var xpathor = new ReliableXpathGenerator();
+            var xpath = xpathor.get_fixed_xpath(event.target);
+            // process xpath, pass to specific receiver
             var item_name = message.item;
             var obj = message.obj;
             message.data[item_name] = xpath;
