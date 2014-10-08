@@ -51,7 +51,7 @@ var PortalProcessor = Processor.extend({
 						'<option value="8">Technology</option><option value="9">Military</option><option value="11">History</option>' +
 						'<option value="10">Auto</option><option value="13">Life</option><option value="15">Humor</option><option value="20">Fashion</option>' + 
 						'<option value="18">Politics</option><option value="19">Art & Culture</option><option value="24">Law</option><option value="27">Beauty</option>' + 
-						'<option value="26">Trevel</option><option value="30">Accident</option><option value="31">Arabdom</option>' + 
+						'<option value="26">Trevel</option><option value="30">Accident</option><option value="31">Arabdom</option><option value="32">Provinces</option>' + 
 						'<option value="33">Science</option><option value="35">Health</option><option value="38">Views</option>' +
 						'<option value="40">Woman</option><option value="41">Famous & Star</option><option value="43">TV Series</option>' + 
 						'<option value="42">Game</option><option value="44">House</option></select>',
