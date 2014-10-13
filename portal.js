@@ -47,14 +47,25 @@ var PortalProcessor = Processor.extend({
 	_category_selection: '<select class="xpathor-dialog-select"><option value="-1" selected>------</option><option value="1">Important News</option>' + 
 						'<option value="2">International</option><option value="3">National</option>' + 
 						'<option value="4">Society</option><option value="5">Entertainment</option>' +
-						'<option value="6">Sport</option><option value="7">Finance</option><option value="12">Other</option>' +
-						'<option value="8">Technology</option><option value="9">Military</option><option value="11">History</option>' +
-						'<option value="10">Auto</option><option value="13">Life</option><option value="15">Humor</option><option value="20">Fashion</option>' + 
-						'<option value="18">Politics</option><option value="19">Art & Culture</option><option value="24">Law</option><option value="27">Beauty</option>' + 
-						'<option value="26">Trevel</option><option value="30">Accident</option><option value="31">Arabdom</option><option value="32">Provinces</option>' + 
-						'<option value="33">Science</option><option value="35">Health</option><option value="38">Views</option>' +
-						'<option value="40">Woman</option><option value="41">Famous & Star</option><option value="43">TV Series</option>' + 
-						'<option value="42">Game</option><option value="44">House</option></select>',
+						'<option value="6">Sport</option><option value="7">Finance</option><option value="8">Technology</option>' +
+						'<option value="9">Military</option><option value="10">Auto</option><option value="11">History</option>' +
+						'<option value="12">Other</option><option value="13">Life</option><option value="14">Education</option>' +
+						'<option value="15">Humor</option><option value="16">Smart Phone</option><option value="17">Magezine</option>' +
+						'<option value="18">Politics</option><option value="19">Art & Culture</option><option value="20">Fashion</option>' + 
+						'<option value="21">Religion</option><option value="22">Taiwan</option><option value="23">Stock</option>' +
+						'<option value="24">Law</option><option value="25">Environment</option><option value="26">Trevel</option>' + 
+						'<option value="27">Beauty</option><option value="29">Ramadan</option><option value="30">Accident</option>' +
+						'<option value="31">Arabdom</option><option value="32">Provinces</option>' + 
+						'<option value="33">Science</option><option value="34">Capital</option><option value="35">Health</option>' + 
+						'<option value="36">Royal Family</option><option value="37">两岸</option><option value="38">Views</option>' +
+						'<option value="40">Woman</option><option value="41">Famous & Star</option><option value="42">Game</option>' + 
+						'<option value="43">TV Series</option><option value="44">House</option>' +
+
+						'<option value="-1">---二级分类---</option><option value="6000">其他体育</option>' +
+						'<option value="6002">足球</option><option value="6003">篮球</option>' +
+						'<option value="6005">网球</option><option value="6006">F1赛车</option>' + 
+						
+						'</select>',
 						//'<option value="40">Emotion</option><option value="41">Food</option></select>',
 	_priority_selection: '<select class="xpathor-dialog-select"><option value="-1" selected>------</option><option value="8">P0</option>' +
 						 '<option value="0">P1</option><option value="4">P2</option></select>',
