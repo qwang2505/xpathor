@@ -114,6 +114,9 @@ jQuery.fn.justtext = function() {
 	if (first == null || first == undefined){
 		return "";
 	}
+	while (first.nodeType == 8){
+		first = first.nextSibling;
+	}
     return first.wholeText == null ? "" : first.wholeText;
 };
 

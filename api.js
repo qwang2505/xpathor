@@ -9,6 +9,7 @@ var Api = {
 		"china-test": "10.2.8.221",
 		"global": "now.dolphin.com",
 		"global-test": "10.2.10.106",
+		"russian": "ru-ru.now.dolphin.com",
 	},
 
 	paths: {
