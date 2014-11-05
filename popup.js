@@ -33,6 +33,7 @@ function load_detail_template(url){
         var templates = data['data'];
         // show preview and append blocks button
         $("#preview_detail_btn").removeClass("hide");
+        $("#add_detail_btn").removeClass("hide");
         $("#edit_detail_btn").removeClass("hide");
         // send message to content scripts to pass the template
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
@@ -119,11 +120,20 @@ function preview_detail(){
         });
     });
 }
-function edit_detail(){
+function add_detail(){
     console.log("[Popup] add detail template clicked");
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         chrome.tabs.sendMessage(tabs[0].id, {name: "extract_news", url: tabs[0].url}, function(response) {
             console.log("[Popup] Response from extract_news: " + response.success);
+            window.close();
+        });
+    });
+}
+function edit_detail(){
+    console.log("[Popup] edit detail template clicked");
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {name: "edit_news", url: tabs[0].url}, function(response) {
+            console.log("[Popup] Response from edit_news: " + response.success);
             window.close();
         });
     });
@@ -318,6 +328,7 @@ function init_detail_tab(){
             if (template != null || template != undefined){
                 if (type == "news"){
                     $("#preview_detail_btn").removeClass("hide");
+                    $("#add_detail_btn").removeClass("hide");
                     $("#edit_detail_btn").removeClass("hide");
                     if (response.previewing){
                         $("#preview_detail_btn").html("Stop Preview");
@@ -381,7 +392,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // news detail buttons
 	document.getElementById("extract_news_btn").addEventListener('click', extract_news);
     document.getElementById("preview_detail_btn").addEventListener('click', preview_detail); 
-    document.getElementById("edit_detail_btn").addEventListener('click', edit_detail); 
+    document.getElementById("add_detail_btn").addEventListener('click', add_detail);
+    document.getElementById("edit_detail_btn").addEventListener('click', edit_detail);
     document.getElementById("save_detail_template_btn").addEventListener('click', save_detail_template); 
     // portal link buttons
 	document.getElementById("extract_link_btn").addEventListener('click', extract_links);

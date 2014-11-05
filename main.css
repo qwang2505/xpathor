@@ -505,3 +505,15 @@ a.xpathor-peep-boxclose{
     padding-right: 10px;
     overflow-y: auto;
 }
+
+
+
+.xpathor-selection-block.xpathor-edit-news-title:before {
+	content: "Title";
+	padding-right: 94px;
+}
+
+.xpathor-selection-block.xpathor-edit-news-content:before {
+	content: "Content";
+	padding-right: 82px;
+}

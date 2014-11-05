@@ -2,6 +2,7 @@
 // global processors to reuse
 var _processors = {};
 var _content_type = null;
+var _edit_news_dialog = null;
 
 // $(window).on('beforeunload', function() {
 //     if (XpathorStorage.unsave){
@@ -44,6 +45,15 @@ chrome.runtime.onMessage.addListener(
         	}
         	processor.preview(TemplateManager.template);
 			console.log("Preview news in main.js");
+        } else if (request.name == "edit_news"){
+            var template = TemplateManager.template;
+            if (template == null || template == undefined || TemplateManager.type != "news"){
+                alert("No news template to edit!");
+                return;
+            }
+            // TODO create dialog to edit news template
+            create_edit_news_dialog(template);
+            _edit_news_dialog.toggleClass("xpathor-dialog-show");
         } else if (request.name == "extract_links"){
             if ("portal_processor" in _processors){
                 processor = _processors["portal_processor"];
@@ -246,4 +256,31 @@ function validate_news(template, newslist){
     } else {
         alert("can not extract news links from block, please try again.");
     }
+}
+
+
+
+function create_edit_news_dialog(template){
+    // create dialog to let user select category, news status, headline status, etc.
+    if (_edit_news_dialog == null){
+        $("body").append('<div id="xpathor_edit_news_dialog" class="xpathor-dialog">' + 
+            '<div id="xpathor_edit_news_dialog_title" class="xpathor-selection-block xpathor-edit-news-title"><input type="text" value=\'\'></div>' + 
+            '<div id="xpathor_edit_news_dialog_content" class="xpathor-selection-block xpathor-edit-news-content"><input type="text" value=\'\'></div>' +
+
+            '<div class="xpathor-selection-buttons"><input type="button" value="取消" id="xpathor_edit_news_dialog_cancel" class="xpathor-dialog-button"></input>' + 
+            '<input type="button" value="确定" id="xpathor_edit_news_dialog_confirm" class="xpathor-dialog-button confirm"></input></div>' +
+            '</div>');
+        // add event listener for buttons
+        $("#xpathor_edit_news_dialog_cancel").click(function(){
+            $("#xpathor_edit_news_dialog").toggleClass("xpathor-dialog-show");
+            return false;
+        });
+        $("#xpathor_edit_news_dialog_confirm").click(function(){
+            $("#xpathor_edit_news_dialog").toggleClass("xpathor-dialog-show");
+            return false;
+        });
+        _edit_news_dialog = $("#xpathor_edit_news_dialog");
+    }
+    $("#xpathor_edit_news_dialog_title input").val(template[0].title);
+    $("#xpathor_edit_news_dialog_content input").val(template[0].content);
 }
